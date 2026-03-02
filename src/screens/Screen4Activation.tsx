@@ -30,7 +30,7 @@ export function Screen4Activation({ onWatchNow }: Screen4ActivationProps) {
               </span>
               <h2 className="slds-text-heading_medium slds-m-bottom_x-small">You’re all set</h2>
               <p className="slds-text-body_regular slds-text-color_weak">
-                Your bundle is active. Start watching in seconds.
+                Your subscription is active. Start watching The Last of Us now.
               </p>
               <div className="slds-m-top_medium">
                 <button
@@ -41,18 +41,18 @@ export function Screen4Activation({ onWatchNow }: Screen4ActivationProps) {
                   Watch Now
                 </button>
               </div>
+              <p className="slds-text-body_small slds-text-color_weak slds-m-top_small">
+                You’re done in 2–3 clicks — under 30 seconds.
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Watch Now rail - content related to initial prompt */}
-      <section className="slds-m-top_large" aria-label="Watch Now">
-        <h3 className="slds-text-heading_small slds-m-bottom_medium">Watch Now — Picked for you</h3>
-        <div
-          className="slds-grid slds-wrap slds-gutters_small"
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem' }}
-        >
+      {/* Watch Now rail - content related to initial prompt (Cold-start curating) */}
+      <section className="slds-m-top_large" aria-label="Top Picks for You">
+        <h3 className="slds-text-heading_small slds-m-bottom_medium">Top Picks for You</h3>
+        <div className="rail-grid">
           {RAIL_ITEMS.map((item, i) => (
             <motion.article
               key={item.id}

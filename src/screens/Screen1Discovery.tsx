@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Icons } from '../components/Icons'
+import { Modal } from '../components/Modal'
 
 const INSPIRATION_CHIPS = [
+  'Live F1 races and 4K nature docs',
   'Live F1 & Documentaries',
   'HBO Hits & 4K Movies',
   'Kids Shows & Family Favorites',
@@ -14,6 +16,7 @@ interface Screen1Props {
 
 export function Screen1Discovery({ onNext }: Screen1Props) {
   const [prompt, setPrompt] = useState('')
+  const [importModalOpen, setImportModalOpen] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,8 +43,11 @@ export function Screen1Discovery({ onNext }: Screen1Props) {
         <h1 className="slds-text-heading_large slds-m-bottom_small" style={{ fontWeight: 300 }}>
           What do you love to watch?
         </h1>
-        <p className="slds-text-body_regular slds-text-color_weak">
+        <p className="slds-text-body_regular slds-text-color_weak slds-m-bottom_x-small">
           We’ll recommend the perfect bundle for you.
+        </p>
+        <p className="slds-text-body_small slds-text-color_weak">
+          Say or type what you love — no genre boxes.
         </p>
       </div>
 
@@ -74,6 +80,17 @@ export function Screen1Discovery({ onNext }: Screen1Props) {
           </div>
         </div>
 
+        <div className="slds-m-bottom_medium slds-text-align_center">
+          <button
+            type="button"
+            className="slds-button slds-button_link slds-text-body_small"
+            onClick={() => setImportModalOpen(true)}
+            style={{ minHeight: 44 }}
+          >
+            Import from Spotify, Netflix, or YouTube
+          </button>
+        </div>
+
         <div className="slds-m-bottom_medium">
           <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">Or try one of these:</p>
           <div className="slds-grid slds-wrap slds-gutters_small slds-grid_vertical-align-center">
@@ -99,6 +116,19 @@ export function Screen1Discovery({ onNext }: Screen1Props) {
           </button>
         </div>
       </form>
+
+      <Modal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        title="Import My Taste"
+      >
+        <p className="slds-text-body_regular">
+          Connect a service to skip questions — we’ll map your taste to our catalog.
+        </p>
+        <p className="slds-text-body_small slds-text-color_weak slds-m-top_small">
+          This feature is coming soon. For now, type or choose an option above to get your bundle.
+        </p>
+      </Modal>
     </motion.div>
   )
 }

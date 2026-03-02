@@ -9,9 +9,29 @@ interface Screen2BundleProps {
 }
 
 const ADDONS = ['HBO Max', '4K Ultra HD', 'Sports Plus', 'DVR 500hr']
-const BUNDLE_NAME = 'The Ultimate Cinephile Pack'
 const DISCOUNT_LABEL = 'Mobile Customer Credit'
 const DISCOUNT_AMOUNT = '-$10 Applied'
+
+/** Derive bundle name from prompt for generative feel (e.g. "Speed & Nature" for F1/docs). */
+function getBundleNameAndPitch(prompt: string): { name: string; pitch: string } {
+  const lower = prompt.toLowerCase()
+  if (lower.includes('f1') || lower.includes('race') || lower.includes('sport') || lower.includes('doc') || lower.includes('nature')) {
+    return {
+      name: 'Speed & Nature',
+      pitch: "We've built the 'Speed & Nature' bundle for you. It includes 4K streaming for docs and sports, plus a 3‑month HBO trial — saving you $12.",
+    }
+  }
+  if (lower.includes('kids') || lower.includes('family')) {
+    return {
+      name: 'Family Favorites',
+      pitch: "We've built the 'Family Favorites' bundle for you. It includes kid-safe streaming, 4K Ultra HD, and DVR so you never miss a show — saving you $10 with your mobile plan.",
+    }
+  }
+  return {
+    name: 'Sunday Night Cinema',
+    pitch: "We've built the 'Sunday Night Cinema' bundle just for you. It includes 4K streaming for your movies and a 3‑month trial of HBO, saving you $12.",
+  }
+}
 
 export function Screen2Bundle({ prompt, onNext, onPriceBreakdown }: Screen2BundleProps) {
   const [loading, setLoading] = useState(true)
@@ -62,13 +82,16 @@ export function Screen2Bundle({ prompt, onNext, onPriceBreakdown }: Screen2Bundl
             </div>
             <div className="slds-media__body">
               <h3 className="slds-card__header-title slds-truncate slds-text-heading_small">
-                {BUNDLE_NAME}
+                {getBundleNameAndPitch(prompt).name}
               </h3>
               <p className="slds-text-body_small slds-text-color_weak">Based on: “{prompt}”</p>
             </div>
           </header>
         </div>
         <div className="slds-card__body slds-card__body_inner">
+          <p className="slds-text-body_regular slds-m-bottom_small">
+            {getBundleNameAndPitch(prompt).pitch}
+          </p>
           <p className="slds-text-body_small slds-m-bottom_small">Included add-ons:</p>
           <div className="slds-m-bottom_medium">
             {ADDONS.map((addon) => (
@@ -81,9 +104,14 @@ export function Screen2Bundle({ prompt, onNext, onPriceBreakdown }: Screen2Bundl
               </span>
             ))}
           </div>
-          <div className="slds-box slds-box_x-small slds-theme_success slds-m-bottom_medium">
+          <div className="slds-box slds-box_x-small slds-theme_success slds-m-bottom_small">
             <span className="slds-text-body_small">
               <strong>{DISCOUNT_LABEL}</strong> {DISCOUNT_AMOUNT}
+            </span>
+          </div>
+          <div className="slds-box slds-box_x-small slds-m-bottom_medium" style={{ background: 'var(--slds-g-neutral-95, #f3f3f3)' }}>
+            <span className="slds-text-body_small slds-text-color_weak">
+              We detected a 4K-ready device and fast connection — we’ve selected the Ultra HD tier.
             </span>
           </div>
           <button

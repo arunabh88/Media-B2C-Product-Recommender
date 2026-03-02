@@ -22,6 +22,10 @@ export function Screen3Checkout({ onNext }: Screen3CheckoutProps) {
     >
       <h2 className="slds-text-heading_medium slds-m-bottom_medium">Checkout</h2>
 
+      <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+        Signed in with Apple — we’ve pre-filled your details and confirmed 18+.
+      </p>
+
       <div className="slds-summary-detail slds-m-bottom_large">
         <div className="slds-summary-detail__content">
           <dl className="slds-dl_horizontal slds-dl_inline">
@@ -47,6 +51,9 @@ export function Screen3Checkout({ onNext }: Screen3CheckoutProps) {
 
       <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
         Pay with your saved method or choose below.
+      </p>
+      <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">
+        We’ve defaulted to Apple Pay — confirm with a double-click.
       </p>
 
       <div className="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">

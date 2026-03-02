@@ -59,6 +59,13 @@ html, body, #root {
   }
 }
 
+@media (min-width: 1024px) {
+  .main-content {
+    max-width: 800px;
+    padding: 2.5rem 3rem;
+  }
+}
+
 /* Premium transition for buttons/cards */
 .slds-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -77,4 +84,51 @@ html, body, #root {
 }
 .slds-button_brand:active {
   transform: scale(0.98);
+}
+
+/* Touch targets: ensure tap areas meet ~44px for accessibility */
+.slds-button {
+  min-height: 44px;
+}
+.slds-button_stretch,
+.slds-button_neutral.slds-p-around_small {
+  min-height: 44px;
+}
+
+/* Small viewports: avoid cramped hero */
+@media (max-width: 359px) {
+  .main-content {
+    padding: 0.75rem;
+  }
+  .slds-text-heading_large {
+    font-size: 1.5rem;
+  }
+}
+
+/* Progress indicator: prevent awkward wrap on narrow screens */
+.progress-wrap ul {
+  flex-wrap: wrap;
+}
+@media (max-width: 480px) {
+  .progress-wrap .slds-progress-indicator__step-label-content {
+    font-size: 0.75rem;
+  }
+}
+
+/* Top Picks rail: responsive grid */
+.rail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .rail-grid {
+    grid-template-columns: repeat(4, minmax(140px, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .rail-grid {
+    grid-template-columns: repeat(5, minmax(160px, 1fr));
+    gap: 1.25rem;
+  }
 }
