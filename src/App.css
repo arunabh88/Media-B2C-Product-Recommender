@@ -1,0 +1,80 @@
+/* SLDS 2.0: Neutral + Brand palette, Salesforce Sans fallback */
+:root {
+  --slds-g-font: "Salesforce Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: var(--slds-g-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mobile-first app shell */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--slds-g-neutral-95, #f3f3f3);
+}
+
+/* Progress bar at top */
+.progress-wrap {
+  flex-shrink: 0;
+  background: var(--slds-g-neutral-100, #fff);
+  box-shadow: 0 1px 2px rgba(0,0,0,.08);
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+/* Mobile: hide sidebar; Desktop: show as column */
+.sidebar {
+  display: none;
+}
+@media (min-width: 768px) {
+  .app {
+    flex-direction: row;
+  }
+  .sidebar {
+    display: block;
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--slds-g-neutral-100, #fff);
+    box-shadow: 2px 0 8px rgba(0,0,0,.06);
+    padding: 1.5rem;
+  }
+  .main-content {
+    flex: 1;
+    padding: 2rem;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+}
+
+/* Premium transition for buttons/cards */
+.slds-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.slds-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.12);
+}
+
+.slds-button_brand {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.slds-button_brand:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 112, 210, 0.4);
+}
+.slds-button_brand:active {
+  transform: scale(0.98);
+}
