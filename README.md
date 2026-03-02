@@ -60,3 +60,9 @@ The repo is set up for Heroku: `Procfile` runs `serve` on the `dist` folder; `he
    Or: **https://media-b2c-product-recommender.herokuapp.com** (or your space’s URL if using a Private Space).
 
 If the app is in a **Private Space** with Trusted IP Ranges, only allowed IPs can reach it; use the URL Heroku shows after deploy.
+
+**If you see a blank page after deploy:** The repo includes an `.npmrc` with `production=false` so Heroku installs devDependencies and the build (Vite + TypeScript) can run. If it still fails, set the config explicitly and redeploy:
+```bash
+heroku config:set NPM_CONFIG_PRODUCTION=false -a media-b2c-product-recommender
+git commit --allow-empty -m "Trigger rebuild" && git push heroku main
+```
