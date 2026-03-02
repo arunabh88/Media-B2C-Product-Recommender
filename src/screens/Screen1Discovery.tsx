@@ -53,8 +53,8 @@ export function Screen1Discovery({ onNext }: Screen1Props) {
 
       <form onSubmit={handleSubmit} className="slds-form" style={{ width: '100%', maxWidth: 560, margin: '0 auto' }}>
         <div className="slds-form-element slds-m-bottom_medium">
-          <div className="slds-form-element__control slds-input-has-icon slds-input-has-icon_left-right">
-            <span className="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_left">
+          <div className="discovery-search-wrap slds-form-element__control slds-input-has-icon slds-input-has-icon_left-right">
+            <span className="slds-icon_container slds-input__icon slds-input__icon_left discovery-search-icon">
               {Icons.search}
             </span>
             <input

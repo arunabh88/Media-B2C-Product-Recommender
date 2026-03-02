@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { ProgressIndicator, type StepValue } from './components/ProgressIndicator'
 import { Modal } from './components/Modal'
 import { Screen1Discovery } from './screens/Screen1Discovery'
 import { Screen2Bundle } from './screens/Screen2Bundle'
 import { Screen3Checkout } from './screens/Screen3Checkout'
 import { Screen4Activation } from './screens/Screen4Activation'
 
-const STEPS: StepValue[] = ['discovery', 'bundle', 'checkout', 'activation']
+type StepValue = 'discovery' | 'bundle' | 'checkout' | 'activation'
 
 export default function App() {
   const [step, setStep] = useState<StepValue>('discovery')
@@ -29,24 +28,6 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* Top: Progress indicator - full width */}
-      <ProgressIndicator currentStep={step} />
-
-      {/* Desktop sidebar - visible from 768px via App.css */}
-      <aside className="sidebar" aria-label="Progress">
-        <nav className="slds-nav-vertical" aria-label="Steps">
-          {STEPS.map((s) => (
-            <span
-              key={s}
-              className={`slds-nav-vertical__item ${step === s ? 'slds-is-active' : ''}`}
-              style={{ textTransform: 'capitalize' }}
-            >
-              {s.replace('_', ' ')}
-            </span>
-          ))}
-        </nav>
-      </aside>
-
       <main className="main-content">
         <AnimatePresence mode="wait">
           {step === 'discovery' && <Screen1Discovery key="1" onNext={handleDiscoveryNext} />}

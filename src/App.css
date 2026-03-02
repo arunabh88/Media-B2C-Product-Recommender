@@ -19,13 +19,6 @@ html, body, #root {
   background: var(--slds-g-neutral-95, #f3f3f3);
 }
 
-/* Progress bar at top */
-.progress-wrap {
-  flex-shrink: 0;
-  background: var(--slds-g-neutral-100, #fff);
-  box-shadow: 0 1px 2px rgba(0,0,0,.08);
-}
-
 /* Main content area */
 .main-content {
   flex: 1;
@@ -35,24 +28,9 @@ html, body, #root {
   box-sizing: border-box;
 }
 
-/* Mobile: hide sidebar; Desktop: show as column */
-.sidebar {
-  display: none;
-}
+/* Mobile: hide sidebar; Desktop: main content only (no sidebar) */
 @media (min-width: 768px) {
-  .app {
-    flex-direction: row;
-  }
-  .sidebar {
-    display: block;
-    width: 280px;
-    flex-shrink: 0;
-    background: var(--slds-g-neutral-100, #fff);
-    box-shadow: 2px 0 8px rgba(0,0,0,.06);
-    padding: 1.5rem;
-  }
   .main-content {
-    flex: 1;
     padding: 2rem;
     max-width: 720px;
     margin: 0 auto;
@@ -105,14 +83,25 @@ html, body, #root {
   }
 }
 
-/* Progress indicator: prevent awkward wrap on narrow screens */
-.progress-wrap ul {
-  flex-wrap: wrap;
+/* Discovery search: keep icon inside bar, dark grey */
+.discovery-search-wrap {
+  position: relative;
 }
-@media (max-width: 480px) {
-  .progress-wrap .slds-progress-indicator__step-label-content {
-    font-size: 0.75rem;
-  }
+.discovery-search-wrap .discovery-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.discovery-search-wrap .discovery-search-icon svg,
+.discovery-search-wrap .discovery-search-icon .slds-icon {
+  fill: #444;
+  width: 1rem;
+  height: 1rem;
+}
+.discovery-search-wrap .slds-input {
+  padding-left: 2.5rem;
 }
 
 /* Top Picks rail: responsive grid */
