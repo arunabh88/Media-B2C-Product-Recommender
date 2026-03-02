@@ -39,3 +39,24 @@ npm run preview
 - **Progress:** Top-of-screen progress indicator; desktop sidebar reflects the same steps.
 
 If SLDS styles don’t load, check the CDN link in `index.html` or install `@salesforce-ux/design-system` and import the CSS from `node_modules`.
+
+## Deploy to Heroku
+
+App: **media-b2c-product-recommender** · Space: **industries-ux**
+
+The repo is set up for Heroku: `Procfile` runs `serve` on the `dist` folder; `heroku-postbuild` runs `npm run build`.
+
+1. **Log in to Heroku** (one time):  
+   `heroku login`
+
+2. **Add the Heroku remote** (if not already added):  
+   `git remote add heroku https://git.heroku.com/media-b2c-product-recommender.git`
+
+3. **Deploy**:  
+   `git push heroku main`
+
+4. **Open the app**:  
+   `heroku open`  
+   Or: **https://media-b2c-product-recommender.herokuapp.com** (or your space’s URL if using a Private Space).
+
+If the app is in a **Private Space** with Trusted IP Ranges, only allowed IPs can reach it; use the URL Heroku shows after deploy.
