@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { AppHeader } from './components/AppHeader'
 import { ProgressIndicator, type StepValue } from './components/ProgressIndicator'
