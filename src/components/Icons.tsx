@@ -35,6 +35,19 @@ export const Icons = {
       <path d="M26 2c-3.3 0-6 2.7-6 6v14c0 3.3 2.7 6 6 6s6-2.7 6-6V8c0-3.3-2.7-6-6-6zm0 2c2.2 0 4 1.8 4 4v14c0 2.2-1.8 4-4 4s-4-1.8-4-4V8c0-2.2 1.8-4 4-4zm-8 14v6c0 4.4 3.6 8 8 8s8-3.6 8-8v-6h2v6c0 5.2-4 9.5-9 10v6h4v2H19v-2h4v-6c-5-.5-9-4.8-9-10v-6h2z" />
     </svg>
   ),
+  /** Modern audio / microphone for voice search – clean filled shape */
+  audioMic: (
+    <svg className="slds-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.83V21c0 .55.45 1 1 1s1-.45 1-1v-2.18c3.02-.48 5.42-2.83 5.91-5.83.09-.6-.39-1.14-1-1.14z" />
+    </svg>
+  ),
+  /** SLDS custom icon custom35 (microphone) – from Lightning Design System icon library. No slds-icon-custom to avoid SLDS background overriding our SVG. */
+  custom35: (
+    <svg className="slds-icon discovery-search-mic-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true">
+      <path d="M69 40c-1.7 0-3 1.3-3 3v5c0 8.8-7.2 16-16 16s-16-7.2-16-16v-5c0-1.7-1.3-3-3-3s-3 1.3-3 3v5c0 11.1 8.3 20.3 19 21.8V74h-5c-1.7 0-3 1.3-3 3s1.3 3 3 3h16c1.7 0 3-1.3 3-3s-1.3-3-3-3h-5v-4.2C63.7 68.3 72 59.1 72 48v-5c0-1.7-1.3-3-3-3z" />
+      <path d="M50 58c5.5 0 10-4.5 10-10V29.9c0-5.5-4.4-9.9-9.9-9.9h-.2c-5.5 0-9.9 4.4-9.9 9.9V48c0 5.5 4.5 10 10 10z" />
+    </svg>
+  ),
   sparkle: (
     <svg className="slds-icon" viewBox="0 0 24 24" aria-hidden="true">
       <path fill="currentColor" d="M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2z" />

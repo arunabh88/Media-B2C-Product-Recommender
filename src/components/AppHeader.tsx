@@ -1,12 +1,9 @@
-import { useState } from 'react'
 import { Icons } from './Icons'
 import type { StepValue } from './ProgressIndicator'
 
 interface AppHeaderProps {
   currentStep?: StepValue
   onLogoClick?: () => void
-  onSearch?: (query: string) => void
-  headerSearchPlaceholder?: string
   /** Home and Discover both go to discovery */
   onHomeOrDiscoverClick?: () => void
   /** My Library: go to activation or open modal */
@@ -19,10 +16,7 @@ const NAV_LINKS: { label: string; href: string; navKey: 'home' | 'discover' | 'l
   { label: 'My Library', href: '#library', navKey: 'library' },
 ]
 
-export function AppHeader({ currentStep, onLogoClick, onSearch, headerSearchPlaceholder, onHomeOrDiscoverClick, onMyLibraryClick }: AppHeaderProps) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const placeholder = headerSearchPlaceholder ?? "What do you want to watch tonight? (e.g., Gritty Sci-Fi or Live Sports)"
-
+export function AppHeader({ currentStep, onLogoClick, onHomeOrDiscoverClick, onMyLibraryClick }: AppHeaderProps) {
   const brandContent = (
     <>
       <span className="app-header__logo" aria-hidden="true">
@@ -34,12 +28,6 @@ export function AppHeader({ currentStep, onLogoClick, onSearch, headerSearchPlac
       <span className="app-header__name">StreamMax</span>
     </>
   )
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const q = searchQuery.trim()
-    if (q && onSearch) onSearch(q)
-  }
 
   return (
     <header className="app-header" role="banner">
@@ -58,7 +46,7 @@ export function AppHeader({ currentStep, onLogoClick, onSearch, headerSearchPlac
             {NAV_LINKS.map((link) => {
               const handleNav = link.navKey === 'library' ? onMyLibraryClick : onHomeOrDiscoverClick
               const isActive =
-                (link.navKey === 'home' || link.navKey === 'discover') && currentStep === 'discovery' ||
+                link.navKey === 'home' && currentStep === 'discovery' ||
                 link.navKey === 'library' && currentStep === 'activation'
               if (handleNav) {
                 return (
@@ -79,23 +67,6 @@ export function AppHeader({ currentStep, onLogoClick, onSearch, headerSearchPlac
               )
             })}
           </nav>
-        </div>
-
-        {/* Center: Salesforce agent-powered Smart Search */}
-        <div className="app-header__center">
-          <form className="app-header__search-wrap" onSubmit={handleSearchSubmit} role="search">
-            <span className="app-header__search-icon" aria-hidden="true">
-              {Icons.sparkle}
-            </span>
-            <input
-              type="search"
-              className="app-header__search-input"
-              placeholder={placeholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              aria-label="Smart search: what do you want to watch?"
-            />
-          </form>
         </div>
 
         {/* Right: Notification, Help, Profile */}

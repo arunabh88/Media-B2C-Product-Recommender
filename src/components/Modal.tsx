@@ -30,7 +30,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
             className="slds-modal slds-fade-in-open slds-modal_medium"
           >
             <motion.div
-              className="slds-modal__container"
+              className="slds-modal__container app-modal-container"
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}

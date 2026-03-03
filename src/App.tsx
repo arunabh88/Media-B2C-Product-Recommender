@@ -55,7 +55,6 @@ export default function App() {
       <AppHeader
         currentStep={step}
         onLogoClick={() => goTo('discovery')}
-        onSearch={(q) => { setPrompt(q); goTo('discovery') }}
         onHomeOrDiscoverClick={() => goTo('discovery')}
         onMyLibraryClick={() => goTo('activation')}
       />

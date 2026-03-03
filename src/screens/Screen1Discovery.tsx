@@ -30,9 +30,13 @@ interface SpeechRecognitionInstance extends EventTarget {
   lang: string
   start: () => void
   stop: () => void
-  onresult: ((e: { results: Iterable<{ [key: number]: { transcript: string } }> }) => void) | null
+  onresult: ((e: SpeechRecognitionResultEvent) => void) | null
   onend: (() => void) | null
   onerror: ((e: { error: string }) => void) | null
+}
+interface SpeechRecognitionResultEvent {
+  resultIndex: number
+  results: Array<{ length: number; isFinal: boolean; 0: { transcript: string }; [i: number]: { transcript: string } }>
 }
 
 interface Screen1Props {
@@ -44,8 +48,9 @@ interface Screen1Props {
 export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelect }: Screen1Props) {
   const [prompt, setPrompt] = useState(initialPrompt)
   const [importModalOpen, setImportModalOpen] = useState(false)
-  const [importStep, setImportStep] = useState<'choose' | 'connecting' | 'success'>('choose')
+  const [importStep, setImportStep] = useState<'choose' | 'consent' | 'connecting' | 'success'>('choose')
   const [importService, setImportService] = useState<'spotify' | 'netflix' | 'youtube' | null>(null)
+  const [consentChecked, setConsentChecked] = useState(false)
   const [browseModalOpen, setBrowseModalOpen] = useState(false)
   const [listening, setListening] = useState(false)
   const [processing, setProcessing] = useState(false)
@@ -53,6 +58,10 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
   const [micDenied, setMicDenied] = useState(false)
   const [broadClarification, setBroadClarification] = useState(false)
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
+  const promptWhenStartedRef = useRef('')
+  const finalTranscriptRef = useRef('')
+  const promptRef = useRef(prompt)
+  promptRef.current = prompt
 
   useEffect(() => {
     if (initialPrompt) setPrompt(initialPrompt)
@@ -70,15 +79,28 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
   const startVoiceInput = useCallback(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (SpeechRecognition) {
+      promptWhenStartedRef.current = promptRef.current
+      finalTranscriptRef.current = ''
       const rec = new SpeechRecognition()
       rec.continuous = false
       rec.interimResults = true
       rec.lang = 'en-US'
-      rec.onresult = (e: { results: Iterable<{ [key: number]: { transcript: string } }> }) => {
-        const results = Array.from(e.results)
-        const last = results[results.length - 1]
-        const transcript = last?.[0]?.transcript ?? ''
-        if (transcript) setPrompt((p) => (p ? `${p} ${transcript}` : transcript).trim())
+      rec.onresult = (e: SpeechRecognitionResultEvent) => {
+        let interim = ''
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const result = e.results[i]
+          const transcript = (result[0]?.transcript ?? '').trim()
+          if (!transcript) continue
+          if (result.isFinal) {
+            finalTranscriptRef.current += (finalTranscriptRef.current ? ' ' : '') + transcript
+          } else {
+            interim += (interim ? ' ' : '') + transcript
+          }
+        }
+        const base = promptWhenStartedRef.current.trim()
+        const session = (finalTranscriptRef.current + (interim ? ' ' + interim : '')).trim()
+        const next = base ? (session ? `${base} ${session}` : base) : session
+        setPrompt(next)
       }
       rec.onend = () => setListening(false)
       rec.onerror = (e: { error: string }) => {
@@ -113,6 +135,7 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
     setImportModalOpen(false)
     setImportStep('choose')
     setImportService(null)
+    setConsentChecked(false)
   }
 
   const handleImportSuccess = () => {
@@ -178,7 +201,7 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
       ) : (
         <>
       <div className="slds-text-align_center slds-m-bottom_large">
-        <h1 className="slds-text-heading_large slds-m-bottom_small" style={{ fontWeight: 300 }}>
+        <h1 className="slds-text-heading_large slds-m-bottom_small discovery-heading" style={{ fontWeight: 300 }}>
           What do you love to watch?
         </h1>
         <p className="slds-text-body_regular slds-text-color_weak slds-m-bottom_x-small">
@@ -191,7 +214,7 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
 
       <form id="discovery-form" onSubmit={handleSubmit} className="slds-form" style={{ width: '100%', maxWidth: 560, margin: '0 auto' }}>
         <div className="slds-form-element slds-m-bottom_medium">
-          <div className={`discovery-search-wrap slds-form-element__control slds-input-has-icon slds-input-has-icon_left-right${prompt ? ' has-clear' : ''}`}>
+          <div className={`discovery-search-wrap slds-form-element__control slds-input-has-icon slds-input-has-icon_left-right${prompt.trim() ? ' has-clear' : ''}`}>
             <span className="slds-icon_container slds-input__icon slds-input__icon_left discovery-search-icon">
               {Icons.search}
             </span>
@@ -205,30 +228,38 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
               aria-label="Describe what you love to watch"
               autoFocus
             />
-            {prompt && (
+            {prompt.trim() ? (
               <button
                 type="button"
-                className="slds-input__icon slds-input__icon_right slds-button slds-button_icon"
+                className="discovery-search-clear slds-input__icon slds-input__icon_right slds-button slds-button_icon"
                 onClick={() => setPrompt('')}
-                aria-label="Clear"
+                aria-label="Clear transcript"
               >
                 {Icons.close}
               </button>
-            )}
+            ) : null}
             <button
               type="button"
-              className="discovery-search-mic slds-button slds-button_icon"
+              className={`discovery-search-mic slds-button slds-button_icon${listening ? ' discovery-search-mic--active' : ''}`}
               onClick={listening ? stopListening : startVoiceInput}
               aria-label={listening ? 'Stop listening' : 'Voice input'}
               title={listening ? 'Stop' : 'Speak'}
             >
-              {Icons.mic}
+              {Icons.custom35}
             </button>
           </div>
         </div>
           {emptyError && (
             <p className="slds-form-element__help slds-m-top_x-small slds-text-color_weak">
               You can type just one thing, like &ldquo;cricket&rdquo; or &ldquo;movies&rdquo;.
+            </p>
+          )}
+          {listening && (
+            <p className="slds-form-element__help slds-m-top_x-small slds-text-color_weak">
+              Listening… Speak now.{' '}
+              <button type="button" className="slds-button slds-button_link slds-text-body_small" onClick={stopListening}>
+                Stop
+              </button>
             </p>
           )}
           {micDenied && (
@@ -242,7 +273,6 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
             type="button"
             className="slds-button slds-button_link slds-text-body_small"
             onClick={() => setBrowseModalOpen(true)}
-            style={{ minHeight: 44 }}
           >
             Browse Popular Plans
           </button>
@@ -253,7 +283,6 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
             type="button"
             className="slds-button slds-button_link slds-text-body_small"
             onClick={() => setImportModalOpen(true)}
-            style={{ minHeight: 44 }}
           >
             Import from Spotify, Netflix, or YouTube
           </button>
@@ -266,7 +295,7 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
               <motion.button
                 key={label}
                 type="button"
-                className="slds-button slds-button_neutral slds-p-around_small"
+                className="discovery-inspiration-chip slds-button slds-button_neutral slds-p-around_small"
                 style={{ borderRadius: 9999, margin: 4 }}
                 onClick={() => handleChipClick(label)}
                 whileHover={{ scale: 1.03 }}
@@ -306,13 +335,49 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
                   className="import-service-card browse-plan-card slds-box"
                   onClick={() => {
                     setImportService(service.id)
-                    setImportStep('connecting')
+                    setImportStep('consent')
                   }}
                 >
                   <h3 className="browse-plan-card__name">{service.name}</h3>
                   <p className="slds-text-body_small slds-text-color_weak">{service.description}</p>
                 </button>
               ))}
+            </div>
+          </>
+        )}
+        {importStep === 'consent' && importService && (
+          <>
+            <p className="slds-text-body_regular slds-m-bottom_medium">
+              We&apos;ll request access to your {IMPORT_SERVICES.find((s) => s.id === importService)?.name ?? importService} account to map your taste and personalize your plan. We only use this data for recommendations. You can cancel anytime.
+            </p>
+            <div className="slds-form-element slds-m-bottom_medium">
+              <div className="slds-form-element__control">
+                <label className="slds-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={consentChecked}
+                    onChange={(e) => setConsentChecked(e.target.checked)}
+                    aria-describedby="consent-checkbox-description"
+                  />
+                  <span className="slds-checkbox_faux" />
+                  <span id="consent-checkbox-description" className="slds-form-element__label slds-m-left_x-small">
+                    I agree to allow StreamMax to access and use my {IMPORT_SERVICES.find((s) => s.id === importService)?.name ?? importService} data to personalize my plan.
+                  </span>
+                </label>
+              </div>
+            </div>
+            <div className="slds-m-top_medium" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="slds-button slds-button_brand"
+                disabled={!consentChecked}
+                onClick={() => setImportStep('connecting')}
+              >
+                Continue
+              </button>
+              <button type="button" className="slds-button slds-button_link" onClick={handleImportModalClose}>
+                Cancel
+              </button>
             </div>
           </>
         )}
@@ -352,7 +417,7 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
         onClose={() => setBrowseModalOpen(false)}
         title="Browse Popular Plans"
       >
-        <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">
+        <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_medium slds-text-align_center">
           Choose a plan to get started.
         </p>
         <div className="browse-plans-grid">
@@ -361,7 +426,12 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
               key={bundle.id}
               className={`browse-plan-card slds-box ${index === 0 ? 'browse-plan-card--ai' : ''}`}
             >
-              {index === 0 && <span className="browse-plan-card__badge">AI Recommended</span>}
+              {index === 0 && (
+                <span className="browse-plan-card__badge browse-plan-card__badge--ai">
+                  <span className="browse-plan-card__badge-icon">{Icons.sparkle}</span>
+                  AI Recommended
+                </span>
+              )}
               <h3 className="browse-plan-card__name">{bundle.name}</h3>
               <p className="browse-plan-card__price">{bundle.priceDisplay}</p>
               <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">{bundle.pitch.slice(0, 80)}…</p>
