@@ -16,6 +16,7 @@ export default function App() {
   const [selectedBundleId, setSelectedBundleId] = useState<string | null>(null)
   const [priceBreakdownBundleId, setPriceBreakdownBundleId] = useState<string | null>(null)
   const [breakdownPromoId, setBreakdownPromoId] = useState<string | null>(null)
+  const [browseModalOpen, setBrowseModalOpen] = useState(false)
   const checkoutPrimaryActionRef = useRef<(() => void) | null>(null)
 
   const goTo = (next: StepValue) => setStep(next)
@@ -55,11 +56,12 @@ export default function App() {
       <AppHeader
         currentStep={step}
         onLogoClick={() => goTo('discovery')}
-        onHomeOrDiscoverClick={() => goTo('discovery')}
+        onHomeClick={() => goTo('discovery')}
+        onFindPlansClick={() => { goTo('discovery'); setBrowseModalOpen(true) }}
         onMyLibraryClick={() => goTo('activation')}
       />
       <main className="main-content">
-        <div className="main-content-card">
+        <div className={`main-content-card${step === 'discovery' ? ' main-content-card--discovery' : ''}`}>
           <ProgressIndicator currentStep={step} />
           <div className="main-content-inner">
         <AnimatePresence mode="wait">
@@ -69,6 +71,9 @@ export default function App() {
               initialPrompt={prompt}
               onNext={handleDiscoveryNext}
               onBrowsePlanSelect={(id) => { setSelectedBundleId(id); goTo('bundle') }}
+              browseModalOpen={browseModalOpen}
+              onBrowseModalOpen={() => setBrowseModalOpen(true)}
+              onBrowseModalClose={() => setBrowseModalOpen(false)}
             />
           )}
           {step === 'bundle' && (
@@ -143,6 +148,15 @@ export default function App() {
         open={priceBreakdownBundleId !== null}
         onClose={() => { setPriceBreakdownBundleId(null); setBreakdownPromoId(null) }}
         title={breakdownBundle ? `Price breakdown — ${breakdownBundle.name}` : 'Price breakdown'}
+        footer={
+          <button
+            type="button"
+            className="slds-button slds-button_brand"
+            onClick={() => { setPriceBreakdownBundleId(null); setBreakdownPromoId(null) }}
+          >
+            Done
+          </button>
+        }
       >
         {breakdownBundle && (
           <PriceBreakdownContent

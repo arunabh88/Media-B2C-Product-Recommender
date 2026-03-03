@@ -17,6 +17,13 @@ const IMPORT_SERVICES: { id: 'spotify' | 'netflix' | 'youtube'; name: string; de
   { id: 'youtube', name: 'YouTube', description: "We'll use your watch history" },
 ]
 
+/** Official logo URLs – Spotify & Netflix from Wikimedia (square icons, no distortion). */
+const IMPORT_SERVICE_LOGO_URLS: Record<'spotify' | 'netflix' | 'youtube', string> = {
+  spotify: 'https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg',
+  netflix: 'https://upload.wikimedia.org/wikipedia/commons/7/75/Netflix_icon.svg',
+  youtube: '',
+}
+
 // Web Speech API types (not in all TS libs)
 declare global {
   interface Window {
@@ -43,15 +50,28 @@ interface Screen1Props {
   initialPrompt?: string
   onNext: (prompt: string) => void
   onBrowsePlanSelect?: (bundleId: string) => void
+  /** When provided, Browse Popular Plans modal is controlled by parent (e.g. from header Find Plans) */
+  browseModalOpen?: boolean
+  onBrowseModalOpen?: () => void
+  onBrowseModalClose?: () => void
 }
 
-export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelect }: Screen1Props) {
+export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelect, browseModalOpen: controlledBrowseOpen, onBrowseModalOpen, onBrowseModalClose }: Screen1Props) {
   const [prompt, setPrompt] = useState(initialPrompt)
   const [importModalOpen, setImportModalOpen] = useState(false)
   const [importStep, setImportStep] = useState<'choose' | 'consent' | 'connecting' | 'success'>('choose')
   const [importService, setImportService] = useState<'spotify' | 'netflix' | 'youtube' | null>(null)
   const [consentChecked, setConsentChecked] = useState(false)
-  const [browseModalOpen, setBrowseModalOpen] = useState(false)
+  const [localBrowseModalOpen, setLocalBrowseModalOpen] = useState(false)
+  const browseModalOpen = onBrowseModalOpen !== undefined ? (controlledBrowseOpen ?? false) : localBrowseModalOpen
+  const setBrowseModalOpen = (open: boolean) => {
+    if (onBrowseModalOpen !== undefined) {
+      if (open) onBrowseModalOpen()
+      else onBrowseModalClose?.()
+    } else {
+      setLocalBrowseModalOpen(open)
+    }
+  }
   const [listening, setListening] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [emptyError, setEmptyError] = useState(false)
@@ -201,18 +221,18 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
       ) : (
         <>
       <div className="slds-text-align_center slds-m-bottom_large">
-        <h1 className="slds-text-heading_large slds-m-bottom_small discovery-heading" style={{ fontWeight: 300 }}>
+        <h1 className="slds-text-heading_large slds-m-bottom_small discovery-heading">
           What do you love to watch?
         </h1>
-        <p className="slds-text-body_regular slds-text-color_weak slds-m-bottom_x-small">
+        <p className="discovery-tagline slds-text-body_regular slds-text-color_weak slds-m-bottom_x-small">
           We’ll recommend the perfect bundle for you.
-        </p>
-        <p className="slds-text-body_small slds-text-color_weak">
-          Say or type what you love — no genre boxes. No commitment. Cancel anytime.
         </p>
       </div>
 
       <form id="discovery-form" onSubmit={handleSubmit} className="slds-form" style={{ width: '100%', maxWidth: 560, margin: '0 auto' }}>
+        <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small slds-text-align_center discovery-search-hint">
+          Say or type what you love — no genre boxes. No commitment. Cancel anytime.
+        </p>
         <div className="slds-form-element slds-m-bottom_medium">
           <div className={`discovery-search-wrap slds-form-element__control slds-input-has-icon slds-input-has-icon_left-right${prompt.trim() ? ' has-clear' : ''}`}>
             <span className="slds-icon_container slds-input__icon slds-input__icon_left discovery-search-icon">
@@ -268,7 +288,7 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
             </p>
           )}
 
-        <div className="slds-m-bottom_medium slds-text-align_center">
+        <div className="discovery-secondary-actions slds-m-bottom_medium slds-text-align_center">
           <button
             type="button"
             className="slds-button slds-button_link slds-text-body_small"
@@ -276,27 +296,25 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
           >
             Browse Popular Plans
           </button>
-        </div>
-
-        <div className="slds-m-bottom_medium slds-text-align_center">
+          <span className="discovery-secondary-actions__separator" aria-hidden="true" />
           <button
             type="button"
             className="slds-button slds-button_link slds-text-body_small"
             onClick={() => setImportModalOpen(true)}
           >
-            Import from Spotify, Netflix, or YouTube
+            Import my taste
           </button>
         </div>
 
-        <div className="slds-m-bottom_medium">
-          <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">Or try one of these:</p>
-          <div className="slds-grid slds-wrap slds-gutters_small slds-grid_vertical-align-center">
+        <div className="discovery-inspiration-wrap slds-m-bottom_medium">
+          <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_x-small">Or try one of these:</p>
+          <div className="discovery-inspiration-grid slds-grid slds-wrap slds-grid_vertical-align-center">
             {INSPIRATION_CHIPS.map((label) => (
               <motion.button
                 key={label}
                 type="button"
-                className="discovery-inspiration-chip slds-button slds-button_neutral slds-p-around_small"
-                style={{ borderRadius: 9999, margin: 4 }}
+                className="discovery-inspiration-chip slds-button slds-button_neutral"
+                style={{ borderRadius: 9999 }}
                 onClick={() => handleChipClick(label)}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
@@ -321,10 +339,63 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
         open={importModalOpen}
         onClose={handleImportModalClose}
         title="Import My Taste"
+        footer={
+          importStep === 'consent' ? (
+            <>
+              <button
+                type="button"
+                className="slds-button slds-button_neutral slds-modal__footer-back"
+                onClick={() => { setImportStep('choose'); setImportService(null) }}
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                className="slds-button slds-button_neutral"
+                onClick={handleImportModalClose}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="slds-button slds-button_brand"
+                disabled={!consentChecked}
+                onClick={() => setImportStep('connecting')}
+              >
+                Continue
+              </button>
+            </>
+          ) : importStep === 'success' ? (
+            <>
+              <button
+                type="button"
+                className="slds-button slds-button_neutral slds-modal__footer-back"
+                onClick={() => { setImportStep('choose'); setImportService(null) }}
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                className="slds-button slds-button_brand"
+                onClick={handleImportSuccess}
+              >
+                Get my plan
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="slds-button slds-button_neutral"
+              onClick={handleImportModalClose}
+            >
+              Cancel
+            </button>
+          )
+        }
       >
         {importStep === 'choose' && (
           <>
-            <p className="slds-text-body_regular slds-m-bottom_medium">
+            <p className="slds-text-body_regular slds-m-bottom_medium slds-text-align_center">
               We&apos;ll use your watch history to recommend the best plan.
             </p>
             <div className="import-service-options">
@@ -338,6 +409,17 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
                     setImportStep('consent')
                   }}
                 >
+                  <span className="import-service-card__logo" aria-hidden="true">
+                    {service.id === 'youtube' ? (
+                      Icons.youtubeLogo
+                    ) : (
+                      <img
+                        src={IMPORT_SERVICE_LOGO_URLS[service.id]}
+                        alt=""
+                        className="import-service-logo import-service-logo--img"
+                      />
+                    )}
+                  </span>
                   <h3 className="browse-plan-card__name">{service.name}</h3>
                   <p className="slds-text-body_small slds-text-color_weak">{service.description}</p>
                 </button>
@@ -366,19 +448,6 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
                 </label>
               </div>
             </div>
-            <div className="slds-m-top_medium" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                className="slds-button slds-button_brand"
-                disabled={!consentChecked}
-                onClick={() => setImportStep('connecting')}
-              >
-                Continue
-              </button>
-              <button type="button" className="slds-button slds-button_link" onClick={handleImportModalClose}>
-                Cancel
-              </button>
-            </div>
           </>
         )}
         {importStep === 'connecting' && importService && (
@@ -401,14 +470,9 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
           </>
         )}
         {importStep === 'success' && importService && (
-          <>
-            <p className="slds-text-body_regular slds-m-bottom_medium">
-              We&apos;ve mapped your taste from {IMPORT_SERVICES.find((s) => s.id === importService)?.name ?? importService}. Here&apos;s your personalized plan.
-            </p>
-            <button type="button" className="slds-button slds-button_brand slds-button_stretch" onClick={handleImportSuccess}>
-              Get my plan
-            </button>
-          </>
+          <p className="slds-text-body_regular slds-m-bottom_medium slds-text-align_center">
+            We&apos;ve mapped your taste from {IMPORT_SERVICES.find((s) => s.id === importService)?.name ?? importService}. Here&apos;s your personalized plan.
+          </p>
         )}
       </Modal>
 
@@ -416,6 +480,15 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
         open={browseModalOpen}
         onClose={() => setBrowseModalOpen(false)}
         title="Browse Popular Plans"
+        footer={
+          <button
+            type="button"
+            className="slds-button slds-button_neutral"
+            onClick={() => setBrowseModalOpen(false)}
+          >
+            Cancel
+          </button>
+        }
       >
         <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_medium slds-text-align_center">
           Choose a plan to get started.

@@ -10,6 +10,12 @@ export const Icons = {
       <path d="M31.6 26l8.2-8.2c.6-.6.6-1.5 0-2.1l-2.1-2.1c-.6-.6-1.5-.6-2.1 0L27.4 21.8l-8.2-8.2c-.6-.6-1.5-.6-2.1 0l-2.1 2.1c-.6.6-.6 1.5 0 2.1l8.2 8.2-8.2 8.2c-.6.6-.6 1.5 0 2.1l2.1 2.1c.6.6 1.5.6 2.1 0l8.2-8.2 8.2 8.2c.6.6 1.5.6 2.1 0l2.1-2.1c.6-.6.6-1.5 0-2.1L31.6 26z" />
     </svg>
   ),
+  /** Menu (hamburger) – three horizontal lines */
+  menu: (
+    <svg className="slds-icon" viewBox="0 0 52 52" aria-hidden="true">
+      <path fill="currentColor" d="M8 14h36v2H8v-2zm0 12h36v2H8v-2zm0 12h36v2H8v-2z" />
+    </svg>
+  ),
   success: (
     <svg className="slds-icon" viewBox="0 0 52 52" aria-hidden="true">
       <path d="M26 2C12.7 2 2 12.7 2 26s10.7 24 24 24 24-10.7 24-24S39.3 2 26 2zm-3.4 32.2l-8.7-8.7 2.9-2.9 5.8 5.8 12.2-12.2 2.9 2.9-15.1 15z" />
@@ -75,6 +81,25 @@ export const Icons = {
   userAction: (
     <svg className="slds-icon slds-icon_action" viewBox="0 0 52 52" aria-hidden="true">
       <path d="M50 43v2.2c0 2.6-2.2 4.8-4.8 4.8H6.8C4.2 50 2 47.8 2 45.2V43c0-5.8 6.8-9.4 13.2-12.2l.6-.3c.5-.2 1-.2 1.5.1 2.6 1.7 5.5 2.6 8.6 2.6s6.1-1 8.6-2.6c.5-.3 1-.3 1.5-.1l.6.3C43.2 33.6 50 37.1 50 43zM26 2c6.6 0 11.9 5.9 11.9 13.2S32.6 28.4 26 28.4s-11.9-5.9-11.9-13.2S19.4 2 26 2z" />
+    </svg>
+  ),
+  /** Spotify logo – green circle with three curved sound-wave bars */
+  spotifyLogo: (
+    <svg className="import-service-logo" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <circle cx="12" cy="12" r="11.5" fill="#1DB954" />
+      <path fill="none" stroke="#FFFFFF" strokeWidth="1.1" strokeLinecap="round" d="M7 9.2q2.5-1.2 5 0q2.5 1.2 5 0M7 12q2.5 1.2 5 0q2.5-1.2 5 0M7 14.8q2.5-1.2 5 0q2.5 1.2 5 0" />
+    </svg>
+  ),
+  /** Netflix logo – red N only, no background (viewBox 18×24) */
+  netflixLogo: (
+    <svg className="import-service-logo import-service-logo--netflix" viewBox="0 0 18 24" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <path fill="#E50914" d="M0 0h4v24H0V0zM4 24L14 0h4v24h-4V0L4 24z" />
+    </svg>
+  ),
+  /** YouTube logo – red rounded rect with play icon */
+  youtubeLogo: (
+    <svg className="import-service-logo" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
     </svg>
   ),
 }

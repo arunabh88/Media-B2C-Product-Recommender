@@ -119,7 +119,20 @@ export function Screen4Activation({ selectedBundle, onWatchNow }: Screen4Activat
         )}
       </section>
 
-      <Modal open={manageModalOpen} onClose={() => setManageModalOpen(false)} title="Manage My Plan">
+      <Modal
+        open={manageModalOpen}
+        onClose={() => setManageModalOpen(false)}
+        title="Manage My Plan"
+        footer={
+          <button
+            type="button"
+            className="slds-button slds-button_brand"
+            onClick={() => setManageModalOpen(false)}
+          >
+            Close
+          </button>
+        }
+      >
         <div className="slds-p-around_medium">
           <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">Account overview (read-only)</p>
           <dl className="slds-dl_horizontal slds-dl_inline">

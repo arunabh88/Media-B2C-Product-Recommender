@@ -7,9 +7,11 @@ interface ModalProps {
   onClose: () => void
   title: string
   children: ReactNode
+  /** Optional SLDS modal footer (e.g. Cancel button) */
+  footer?: ReactNode
 }
 
-export function Modal({ open, onClose, title, children }: ModalProps) {
+export function Modal({ open, onClose, title, children, footer }: ModalProps) {
   return (
     <AnimatePresence>
       {open && (
@@ -53,6 +55,11 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
                 </h2>
               </header>
               <div className="slds-modal__content slds-p-around_medium">{children}</div>
+              {footer != null ? (
+                <footer className="slds-modal__footer">
+                  {footer}
+                </footer>
+              ) : null}
             </motion.div>
           </section>
         </Fragment>

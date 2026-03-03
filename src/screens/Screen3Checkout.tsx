@@ -150,7 +150,20 @@ export function Screen3Checkout({ selectedBundle, onNext, onBack, registerPrimar
         </>
       )}
 
-      <Modal open={paymentModalOpen} onClose={() => setPaymentModalOpen(false)} title="Pay with card or UPI">
+      <Modal
+        open={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        title="Pay with card or UPI"
+        footer={
+          <button
+            type="button"
+            className="slds-button slds-button_neutral"
+            onClick={() => setPaymentModalOpen(false)}
+          >
+            Cancel
+          </button>
+        }
+      >
         <div className="payment-modal-tabs">
           <div className="slds-tabs_default">
             <ul className="slds-tabs_default__nav" role="tablist">

@@ -35,24 +35,36 @@ html, body, #root {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  background: var(--slds-g-neutral-100, #fff);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  padding: 1rem 1.25rem 1.5rem;
+  margin: 0 auto;
 }
 @media (min-width: 768px) {
   .main-content-card {
-    background: var(--slds-g-neutral-100, #fff);
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-    padding: 1.5rem 2rem 2rem;
     max-width: 720px;
-    margin: 0 auto;
+    padding: 1.5rem 2rem 2rem;
   }
 }
 .main-content-inner {
   margin-top: 0.5rem;
 }
+.main-content-card--discovery {
+  padding-bottom: 0.5rem;
+}
+@media (min-width: 768px) {
+  .main-content-card--discovery {
+    padding-bottom: 0.75rem;
+  }
+}
 @media (min-width: 1024px) {
   .main-content-card {
     max-width: 960px;
     padding: 2rem 2.5rem 2.5rem;
+  }
+  .main-content-card--discovery {
+    padding-bottom: 1rem;
   }
 }
 
@@ -249,7 +261,7 @@ html, body, #root {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--slds-g-brand, #0176d3);
+  color: #0d9488;
 }
 .app-header__logo svg {
   display: block;
@@ -262,6 +274,28 @@ html, body, #root {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.app-header__hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  color: var(--slds-g-neutral-30, #444);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.app-header__hamburger:hover {
+  background: var(--slds-g-neutral-95, #f3f3f3);
+}
+.app-header__hamburger .slds-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: currentColor;
 }
 @media (max-width: 360px) {
   .app-header__name {
@@ -283,9 +317,23 @@ html, body, #root {
     align-self: center;
   }
 }
-@media (max-width: 600px) {
-  .app-header__nav { display: none; }
-  .app-header__separator { display: none; }
+@media (max-width: 768px) {
+  .app-header__nav,
+  .app-header__separator {
+    display: none;
+  }
+  .app-header__hamburger {
+    display: flex;
+  }
+}
+@media (max-width: 768px) {
+  .app-header__nav,
+  .app-header__separator {
+    display: none;
+  }
+  .app-header__hamburger {
+    display: flex;
+  }
 }
 @media (max-width: 400px) {
   .app-header__right {
@@ -305,6 +353,102 @@ html, body, #root {
   }
 }
 
+/* Mobile menu (hamburger): overlay + slide-out panel */
+.app-header__menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 999;
+  animation: app-header-backdrop-in 0.2s ease-out;
+}
+.app-header__menu-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(280px, 85vw);
+  max-width: 100%;
+  background: var(--slds-g-neutral-100, #fff);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: app-header-panel-in 0.25s ease-out;
+}
+.app-header__menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--slds-g-neutral-90, #e5e5e5);
+  flex-shrink: 0;
+}
+.app-header__menu-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--slds-g-neutral-10, #181818);
+}
+.app-header__menu-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  color: var(--slds-g-neutral-50, #706e6b);
+  cursor: pointer;
+}
+.app-header__menu-close:hover {
+  background: var(--slds-g-neutral-95, #f3f3f3);
+  color: var(--slds-g-neutral-30, #444);
+}
+.app-header__menu-close .slds-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: currentColor;
+}
+.app-header__menu-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 0;
+  overflow: auto;
+}
+.app-header__menu-nav .app-header__nav-link,
+.app-header__menu-nav .app-header__nav-link--button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.875rem 1.25rem;
+  font-size: 1rem;
+  border-radius: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--slds-g-neutral-20, #3e3e3c);
+  cursor: pointer;
+}
+.app-header__menu-nav .app-header__nav-link:hover,
+.app-header__menu-nav .app-header__nav-link--button:hover {
+  background: var(--slds-g-neutral-95, #f3f3f3);
+  color: var(--slds-g-brand, #0176d3);
+}
+.app-header__menu-nav .app-header__nav-link--active {
+  color: var(--slds-g-brand, #0176d3);
+  font-weight: 600;
+  background: rgba(1, 118, 211, 0.08);
+}
+@keyframes app-header-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes app-header-panel-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
 /* Mobile: bottom-fixed primary CTA – rounded top corners */
 .app-bottom-cta {
   display: none;
@@ -319,12 +463,10 @@ html, body, #root {
   box-sizing: border-box;
   border-radius: 12px 12px 0 0;
 }
+/* Mobile: bottom-fixed primary CTA removed to avoid repeating CTAs */
 @media (max-width: 768px) {
   .app-bottom-cta {
-    display: block;
-  }
-  .main-content {
-    padding-bottom: 4rem;
+    display: none;
   }
 }
 
@@ -461,10 +603,23 @@ html, body, #root {
   min-height: 44px;
 }
 /* Inspiration chips: compact height */
+.discovery-inspiration-wrap {
+  margin-bottom: 1rem;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  text-align: center;
+}
+.discovery-inspiration-wrap .slds-text-body_small {
+  margin-bottom: 0.25rem;
+}
+.discovery-inspiration-grid {
+  gap: 0.35rem 0.5rem;
+  justify-content: center;
+}
 .discovery-inspiration-chip {
   min-height: 0;
-  padding-top: 0.35rem;
-  padding-bottom: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8125rem;
   line-height: 1.25;
 }
 .slds-button_icon {
@@ -516,7 +671,25 @@ html, body, #root {
 
 /* Discovery hero heading: slightly darker grey */
 .discovery-heading {
+  font-weight: 400;
   color: var(--slds-g-neutral-20, #3e3e3c);
+}
+.discovery-tagline {
+  font-weight: 700;
+}
+
+.discovery-secondary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+}
+.discovery-secondary-actions__separator {
+  width: 1px;
+  height: 1rem;
+  background: var(--slds-g-neutral-80, #c9c9c9);
+  flex-shrink: 0;
 }
 
 /* Discovery search: rounded input with icon */
@@ -758,20 +931,59 @@ html, body, #root {
   color: var(--slds-g-neutral-50, #706e6b);
 }
 
-/* Modal: rounded corner card — override SLDS */
+/* Modal overlay (backdrop) and dialog: full viewport, edge to edge */
+.slds-backdrop.slds-backdrop_open,
+.app .slds-backdrop.slds-backdrop_open {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+section.slds-modal,
+.app section.slds-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Modal: rounded corner card — no shadow on any modal (Import, Browse, Price breakdown, Pay, Manage, Device, etc.) */
 .slds-modal__container,
 .app .slds-modal__container,
 section.slds-modal .slds-modal__container,
 .app-modal-container {
   border-radius: 16px !important;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: none;
 }
 /* SLDS 2 uses CSS vars for radius in some builds */
 .slds-modal__header,
 .slds-modal__footer,
 .app-modal-container {
   --slds-c-modal-radius-border: 16px;
+}
+.slds-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.slds-modal__footer .slds-modal__footer-back {
+  margin-right: auto;
+}
+.slds-modal__footer .slds-button {
+  min-height: 36px;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
 }
 
 /* Modal header: prevent close icon from cropping */
@@ -954,6 +1166,28 @@ section.slds-modal .slds-modal__container,
   cursor: pointer;
   font: inherit;
   width: 100%;
+}
+.import-service-card__logo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 0.5rem;
+}
+.import-service-card__logo .import-service-logo {
+  width: 32px;
+  height: 32px;
+  display: block;
+  flex-shrink: 0;
+}
+/* Netflix N has viewBox 18×24 – size by height so aspect ratio is preserved */
+.import-service-card__logo .import-service-logo--netflix {
+  width: auto;
+  height: 32px;
+}
+.import-service-card__logo .import-service-logo--img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 .import-service-card .browse-plan-card__name {
   margin-bottom: 0.25rem;

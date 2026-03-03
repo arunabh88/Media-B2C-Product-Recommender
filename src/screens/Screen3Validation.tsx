@@ -117,6 +117,24 @@ export function Screen3Validation({ selectedBundle, onNext, onBack }: Screen3Val
         open={deviceModalOpen}
         onClose={() => setDeviceModalOpen(false)}
         title="Change device"
+        footer={
+          <>
+            <button
+              type="button"
+              className="slds-button slds-button_neutral"
+              onClick={() => setDeviceModalOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="slds-button slds-button_brand"
+              onClick={() => setDeviceModalOpen(false)}
+            >
+              Done
+            </button>
+          </>
+        }
       >
         <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">
           Select how you&apos;ll watch.
@@ -140,15 +158,6 @@ export function Screen3Validation({ selectedBundle, onNext, onBack }: Screen3Val
               </div>
             ))}
           </div>
-        </div>
-        <div className="slds-m-top_medium">
-          <button
-            type="button"
-            className="slds-button slds-button_brand"
-            onClick={() => setDeviceModalOpen(false)}
-          >
-            Done
-          </button>
         </div>
       </Modal>
     </motion.div>
