@@ -1,91 +1,210 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
+import { AppHeader } from './components/AppHeader'
+import { ProgressIndicator, type StepValue } from './components/ProgressIndicator'
 import { Modal } from './components/Modal'
+import { getBundleById, getBreakdownWithoutTotalAndDiscount, computeTotalWithPromo, type BundleDefinition, type PromoOption } from './data/bundles'
 import { Screen1Discovery } from './screens/Screen1Discovery'
 import { Screen2Bundle } from './screens/Screen2Bundle'
 import { Screen3Checkout } from './screens/Screen3Checkout'
+import { Screen3Validation } from './screens/Screen3Validation'
 import { Screen4Activation } from './screens/Screen4Activation'
-
-type StepValue = 'discovery' | 'bundle' | 'checkout' | 'activation'
 
 export default function App() {
   const [step, setStep] = useState<StepValue>('discovery')
   const [prompt, setPrompt] = useState('')
-  const [priceBreakdownOpen, setPriceBreakdownOpen] = useState(false)
+  const [selectedBundleId, setSelectedBundleId] = useState<string | null>(null)
+  const [priceBreakdownBundleId, setPriceBreakdownBundleId] = useState<string | null>(null)
+  const [breakdownPromoId, setBreakdownPromoId] = useState<string | null>(null)
+  const checkoutPrimaryActionRef = useRef<(() => void) | null>(null)
 
   const goTo = (next: StepValue) => setStep(next)
+
+  const goBack = () => {
+    if (step === 'bundle') goTo('discovery')
+    else if (step === 'validation') goTo('bundle')
+    else if (step === 'checkout') goTo('validation')
+    else if (step === 'activation') goTo('checkout')
+  }
 
   const handleDiscoveryNext = (value: string) => {
     setPrompt(value)
     goTo('bundle')
   }
 
+  const handleBundleNext = (bundleId: string) => {
+    setSelectedBundleId(bundleId)
+    goTo('validation')
+  }
+
   const handleWatchNow = () => {
-    // Could open external player or in-app; for prototype just a no-op or reset
     if (step === 'activation') return
     goTo('activation')
   }
 
+  const breakdownBundle = priceBreakdownBundleId ? getBundleById(priceBreakdownBundleId) : null
+  const selectedBundle = selectedBundleId ? getBundleById(selectedBundleId) : null
+
+  const openPriceBreakdown = (bundleId: string) => {
+    setPriceBreakdownBundleId(bundleId)
+    setBreakdownPromoId(null)
+  }
+
   return (
     <div className="app">
+      <AppHeader
+        currentStep={step}
+        onLogoClick={() => goTo('discovery')}
+        onSearch={(q) => { setPrompt(q); goTo('discovery') }}
+        onHomeOrDiscoverClick={() => goTo('discovery')}
+        onMyLibraryClick={() => goTo('activation')}
+      />
       <main className="main-content">
+        <div className="main-content-card">
+          <ProgressIndicator currentStep={step} />
+          <div className="main-content-inner">
         <AnimatePresence mode="wait">
-          {step === 'discovery' && <Screen1Discovery key="1" onNext={handleDiscoveryNext} />}
+          {step === 'discovery' && (
+            <Screen1Discovery
+              key="1"
+              initialPrompt={prompt}
+              onNext={handleDiscoveryNext}
+              onBrowsePlanSelect={(id) => { setSelectedBundleId(id); goTo('bundle') }}
+            />
+          )}
           {step === 'bundle' && (
             <Screen2Bundle
               key="2"
               prompt={prompt}
+              initialBestFitBundleId={selectedBundleId}
+              onNext={handleBundleNext}
+              onPriceBreakdown={openPriceBreakdown}
+              onBack={goBack}
+            />
+          )}
+          {step === 'validation' && (
+            <Screen3Validation
+              key="validation"
+              selectedBundle={selectedBundle}
               onNext={() => goTo('checkout')}
-              onPriceBreakdown={() => setPriceBreakdownOpen(true)}
+              onBack={goBack}
             />
           )}
           {step === 'checkout' && (
-            <Screen3Checkout key="3" onNext={() => goTo('activation')} />
+            <Screen3Checkout
+              key="3"
+              selectedBundle={selectedBundle}
+              onNext={() => goTo('activation')}
+              onBack={goBack}
+              registerPrimaryAction={(fn) => { checkoutPrimaryActionRef.current = fn }}
+            />
           )}
           {step === 'activation' && (
-            <Screen4Activation key="4" onWatchNow={handleWatchNow} />
+            <Screen4Activation
+              key="4"
+              selectedBundle={selectedBundle}
+              onWatchNow={handleWatchNow}
+            />
           )}
         </AnimatePresence>
+          </div>
+        </div>
       </main>
 
+      {/* Mobile: bottom-fixed primary CTA */}
+      <div className="app-bottom-cta" aria-hidden="true">
+        {step === 'discovery' && (
+          <button type="button" className="slds-button slds-button_brand slds-button_stretch" onClick={() => document.getElementById('discovery-form')?.scrollIntoView({ behavior: 'smooth' })}>
+            Find My Best Plan
+          </button>
+        )}
+        {step === 'bundle' && (
+          <button type="button" className="slds-button slds-button_brand slds-button_stretch" onClick={() => document.getElementById('bundle-cards')?.scrollIntoView({ behavior: 'smooth' })}>
+            See plans
+          </button>
+        )}
+        {step === 'validation' && (
+          <button type="button" className="slds-button slds-button_brand slds-button_stretch" onClick={() => goTo('checkout')}>
+            Continue
+          </button>
+        )}
+        {step === 'checkout' && (
+          <button type="button" className="slds-button slds-button_brand slds-button_stretch" onClick={() => checkoutPrimaryActionRef.current?.()}>
+            Confirm & Subscribe
+          </button>
+        )}
+        {step === 'activation' && (
+          <button type="button" className="slds-button slds-button_brand slds-button_stretch" onClick={handleWatchNow}>
+            Watch Now
+          </button>
+        )}
+      </div>
+
       <Modal
-        open={priceBreakdownOpen}
-        onClose={() => setPriceBreakdownOpen(false)}
-        title="Price breakdown"
+        open={priceBreakdownBundleId !== null}
+        onClose={() => { setPriceBreakdownBundleId(null); setBreakdownPromoId(null) }}
+        title={breakdownBundle ? `Price breakdown — ${breakdownBundle.name}` : 'Price breakdown'}
       >
-        <div className="slds-summary-detail">
-          <dl className="slds-dl_horizontal slds-dl_inline">
-            <div className="slds-item slds-m-bottom_small">
-              <dt className="slds-dl_horizontal__label">Base plan</dt>
-              <dd className="slds-dl_horizontal__detail">$49.99/mo</dd>
-            </div>
-            <div className="slds-item slds-m-bottom_small">
-              <dt className="slds-dl_horizontal__label">HBO Max</dt>
-              <dd className="slds-dl_horizontal__detail">$9.99/mo</dd>
-            </div>
-            <div className="slds-item slds-m-bottom_small">
-              <dt className="slds-dl_horizontal__label">4K Ultra HD</dt>
-              <dd className="slds-dl_horizontal__detail">$4.99/mo</dd>
-            </div>
-            <div className="slds-item slds-m-bottom_small">
-              <dt className="slds-dl_horizontal__label">Sports Plus</dt>
-              <dd className="slds-dl_horizontal__detail">$7.99/mo</dd>
-            </div>
-            <div className="slds-item slds-m-bottom_small">
-              <dt className="slds-dl_horizontal__label">DVR 500hr</dt>
-              <dd className="slds-dl_horizontal__detail">$12.99/mo</dd>
-            </div>
-            <div className="slds-item slds-m-bottom_small slds-theme_success">
-              <dt className="slds-dl_horizontal__label">Mobile Customer Credit</dt>
-              <dd className="slds-dl_horizontal__detail">-$10.00/mo</dd>
-            </div>
-            <div className="slds-item slds-m-top_small slds-p-top_small" style={{ borderTop: '1px solid #e5e5e5' }}>
-              <dt className="slds-dl_horizontal__label slds-text-title">Total</dt>
-              <dd className="slds-dl_horizontal__detail slds-text-heading_small">$54.99/mo</dd>
-            </div>
-          </dl>
-        </div>
+        {breakdownBundle && (
+          <PriceBreakdownContent
+            bundle={breakdownBundle}
+            selectedPromoId={breakdownPromoId}
+            onSelectPromo={setBreakdownPromoId}
+          />
+        )}
       </Modal>
+    </div>
+  )
+}
+
+function PriceBreakdownContent({
+  bundle,
+  selectedPromoId,
+  onSelectPromo,
+}: {
+  bundle: BundleDefinition
+  selectedPromoId: string | null
+  onSelectPromo: (id: string) => void
+}) {
+  const promos = bundle.promos ?? []
+  const selectedPromo: PromoOption | undefined =
+    selectedPromoId ? promos.find((p) => p.id === selectedPromoId) : promos[0]
+  const effectivePromo = selectedPromo ?? (promos.find((p) => p.isDiscount) ?? undefined)
+  const totalDisplay = computeTotalWithPromo(bundle, effectivePromo)
+  const lineItems = getBreakdownWithoutTotalAndDiscount(bundle)
+
+  return (
+    <div className="price-breakdown-modal">
+      <div className="price-breakdown-list">
+        {lineItems.map((item, index) => (
+          <div key={index} className="price-breakdown-row">
+            <span className="price-breakdown-label">{item.label}</span>
+            <span className="price-breakdown-value">{item.value}</span>
+          </div>
+        ))}
+      </div>
+      {promos.length > 0 && (
+        <div className="price-breakdown-promo-section">
+          <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_x-small">Promo</p>
+          <div className="slds-button-group slds-m-bottom_small" role="group">
+            {promos.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                className={`slds-button ${effectivePromo?.id === p.id ? 'slds-button_brand' : 'slds-button_neutral'}`}
+                onClick={() => onSelectPromo(p.id)}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      <div className="price-breakdown-separator" />
+      <div className="price-breakdown-row price-breakdown-total">
+        <span className="price-breakdown-label">Total</span>
+        <span className="price-breakdown-value">{totalDisplay}</span>
+      </div>
     </div>
   )
 }

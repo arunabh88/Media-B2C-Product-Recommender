@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Icons } from '../components/Icons'
 import { Modal } from '../components/Modal'
+import { BUNDLES } from '../data/bundles'
 
 const INSPIRATION_CHIPS = [
   'Live F1 races and 4K nature docs',
@@ -10,23 +11,142 @@ const INSPIRATION_CHIPS = [
   'Kids Shows & Family Favorites',
 ]
 
-interface Screen1Props {
-  onNext: (prompt: string) => void
+const IMPORT_SERVICES: { id: 'spotify' | 'netflix' | 'youtube'; name: string; description: string }[] = [
+  { id: 'spotify', name: 'Spotify', description: "Music and podcasts – we'll infer your taste" },
+  { id: 'netflix', name: 'Netflix', description: "We'll use your viewing history" },
+  { id: 'youtube', name: 'YouTube', description: "We'll use your watch history" },
+]
+
+// Web Speech API types (not in all TS libs)
+declare global {
+  interface Window {
+    SpeechRecognition?: new () => SpeechRecognitionInstance
+    webkitSpeechRecognition?: new () => SpeechRecognitionInstance
+  }
+}
+interface SpeechRecognitionInstance extends EventTarget {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start: () => void
+  stop: () => void
+  onresult: ((e: { results: Iterable<{ [key: number]: { transcript: string } }> }) => void) | null
+  onend: (() => void) | null
+  onerror: ((e: { error: string }) => void) | null
 }
 
-export function Screen1Discovery({ onNext }: Screen1Props) {
-  const [prompt, setPrompt] = useState('')
+interface Screen1Props {
+  initialPrompt?: string
+  onNext: (prompt: string) => void
+  onBrowsePlanSelect?: (bundleId: string) => void
+}
+
+export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelect }: Screen1Props) {
+  const [prompt, setPrompt] = useState(initialPrompt)
   const [importModalOpen, setImportModalOpen] = useState(false)
+  const [importStep, setImportStep] = useState<'choose' | 'connecting' | 'success'>('choose')
+  const [importService, setImportService] = useState<'spotify' | 'netflix' | 'youtube' | null>(null)
+  const [browseModalOpen, setBrowseModalOpen] = useState(false)
+  const [listening, setListening] = useState(false)
+  const [processing, setProcessing] = useState(false)
+  const [emptyError, setEmptyError] = useState(false)
+  const [micDenied, setMicDenied] = useState(false)
+  const [broadClarification, setBroadClarification] = useState(false)
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
+
+  useEffect(() => {
+    if (initialPrompt) setPrompt(initialPrompt)
+  }, [initialPrompt])
+
+  const stopListening = useCallback(() => {
+    const rec = recognitionRef.current
+    if (rec) {
+      try { rec.stop() } catch (_) { /* noop */ }
+      recognitionRef.current = null
+    }
+    setListening(false)
+  }, [])
+
+  const startVoiceInput = useCallback(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (SpeechRecognition) {
+      const rec = new SpeechRecognition()
+      rec.continuous = false
+      rec.interimResults = true
+      rec.lang = 'en-US'
+      rec.onresult = (e: { results: Iterable<{ [key: number]: { transcript: string } }> }) => {
+        const results = Array.from(e.results)
+        const last = results[results.length - 1]
+        const transcript = last?.[0]?.transcript ?? ''
+        if (transcript) setPrompt((p) => (p ? `${p} ${transcript}` : transcript).trim())
+      }
+      rec.onend = () => setListening(false)
+      rec.onerror = (e: { error: string }) => {
+        setListening(false)
+        if (e.error === 'not-allowed' || e.error === 'permission-denied') setMicDenied(true)
+      }
+      recognitionRef.current = rec
+      setListening(true)
+      try { rec.start() } catch {
+        setListening(false)
+        setMicDenied(true)
+      }
+      return
+    }
+    // Fallback: mock voice input
+    setListening(true)
+    setTimeout(() => {
+      setPrompt((p) => (p ? `${p} live sports and 4K documentaries` : 'live sports and 4K documentaries').trim())
+      setListening(false)
+    }, 800)
+  }, [])
+
+  useEffect(() => () => stopListening(), [stopListening])
+
+  useEffect(() => {
+    if (importStep !== 'connecting' || !importService) return
+    const t = setTimeout(() => setImportStep('success'), 1500)
+    return () => clearTimeout(t)
+  }, [importStep, importService])
+
+  const handleImportModalClose = () => {
+    setImportModalOpen(false)
+    setImportStep('choose')
+    setImportService(null)
+  }
+
+  const handleImportSuccess = () => {
+    const mockPrompt = importService ? `Imported from ${IMPORT_SERVICES.find((s) => s.id === importService)?.name ?? importService}` : 'Imported taste'
+    handleImportModalClose()
+    onNext(mockPrompt)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const value = prompt.trim() || INSPIRATION_CHIPS[0]
-    onNext(value)
+    setEmptyError(false)
+    const value = prompt.trim()
+    if (!value) {
+      setEmptyError(true)
+      return
+    }
+    const isBroad = /^(everything|anything|all)$/i.test(value) || value.length < 3
+    if (isBroad) setBroadClarification(true)
+    setProcessing(true)
+    setTimeout(() => {
+      setProcessing(false)
+      setBroadClarification(false)
+      onNext(value || INSPIRATION_CHIPS[0])
+    }, 1500)
   }
 
   const handleChipClick = (label: string) => {
     setPrompt(label)
-    onNext(label)
+    setEmptyError(false)
+    setProcessing(true)
+    setTimeout(() => {
+      setProcessing(false)
+      onNext(label)
+    }, 1200)
   }
 
   return (
@@ -39,6 +159,24 @@ export function Screen1Discovery({ onNext }: Screen1Props) {
       className="slds-grid slds-grid_vertical slds-grid_vertical-align-center"
       style={{ minHeight: '70vh', padding: '2rem 0' }}
     >
+      {processing ? (
+        <div className="slds-grid slds-grid_vertical-align-center" style={{ minHeight: '40vh', flexDirection: 'column' }}>
+          <div className="slds-spinner slds-spinner_medium" role="status" aria-label="Loading">
+            <span className="slds-assistive-text">Loading</span>
+            <div className="slds-spinner__dot-a" />
+            <div className="slds-spinner__dot-b" />
+          </div>
+          <p className="slds-m-top_medium slds-text-body_regular slds-text-color_weak">
+            Understanding your preferences…
+          </p>
+          {broadClarification && (
+            <p className="slds-m-top_small slds-text-body_small slds-text-color_weak">
+              Got it — we&apos;ll start broad and fine-tune later.
+            </p>
+          )}
+        </div>
+      ) : (
+        <>
       <div className="slds-text-align_center slds-m-bottom_large">
         <h1 className="slds-text-heading_large slds-m-bottom_small" style={{ fontWeight: 300 }}>
           What do you love to watch?
@@ -47,13 +185,13 @@ export function Screen1Discovery({ onNext }: Screen1Props) {
           We’ll recommend the perfect bundle for you.
         </p>
         <p className="slds-text-body_small slds-text-color_weak">
-          Say or type what you love — no genre boxes.
+          Say or type what you love — no genre boxes. No commitment. Cancel anytime.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="slds-form" style={{ width: '100%', maxWidth: 560, margin: '0 auto' }}>
+      <form id="discovery-form" onSubmit={handleSubmit} className="slds-form" style={{ width: '100%', maxWidth: 560, margin: '0 auto' }}>
         <div className="slds-form-element slds-m-bottom_medium">
-          <div className="discovery-search-wrap slds-form-element__control slds-input-has-icon slds-input-has-icon_left-right">
+          <div className={`discovery-search-wrap slds-form-element__control slds-input-has-icon slds-input-has-icon_left-right${prompt ? ' has-clear' : ''}`}>
             <span className="slds-icon_container slds-input__icon slds-input__icon_left discovery-search-icon">
               {Icons.search}
             </span>
@@ -61,7 +199,7 @@ export function Screen1Discovery({ onNext }: Screen1Props) {
               id="discovery-prompt"
               type="search"
               className="slds-input"
-              placeholder="Tell me what you love to watch..."
+              placeholder="Tell us what you love to watch — sports, movies, live TV, anything."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               aria-label="Describe what you love to watch"
@@ -77,7 +215,37 @@ export function Screen1Discovery({ onNext }: Screen1Props) {
                 {Icons.close}
               </button>
             )}
+            <button
+              type="button"
+              className="discovery-search-mic slds-button slds-button_icon"
+              onClick={listening ? stopListening : startVoiceInput}
+              aria-label={listening ? 'Stop listening' : 'Voice input'}
+              title={listening ? 'Stop' : 'Speak'}
+            >
+              {Icons.mic}
+            </button>
           </div>
+        </div>
+          {emptyError && (
+            <p className="slds-form-element__help slds-m-top_x-small slds-text-color_weak">
+              You can type just one thing, like &ldquo;cricket&rdquo; or &ldquo;movies&rdquo;.
+            </p>
+          )}
+          {micDenied && (
+            <p className="slds-form-element__help slds-m-top_x-small slds-text-color_weak">
+              No worries — you can type instead.
+            </p>
+          )}
+
+        <div className="slds-m-bottom_medium slds-text-align_center">
+          <button
+            type="button"
+            className="slds-button slds-button_link slds-text-body_small"
+            onClick={() => setBrowseModalOpen(true)}
+            style={{ minHeight: 44 }}
+          >
+            Browse Popular Plans
+          </button>
         </div>
 
         <div className="slds-m-bottom_medium slds-text-align_center">
@@ -112,22 +280,105 @@ export function Screen1Discovery({ onNext }: Screen1Props) {
 
         <div className="slds-text-align_center">
           <button type="submit" className="slds-button slds-button_brand slds-button_stretch">
-            Find my bundle
+            Find My Best Plan
           </button>
         </div>
       </form>
 
+        </>
+      )}
+
       <Modal
         open={importModalOpen}
-        onClose={() => setImportModalOpen(false)}
+        onClose={handleImportModalClose}
         title="Import My Taste"
       >
-        <p className="slds-text-body_regular">
-          Connect a service to skip questions — we’ll map your taste to our catalog.
+        {importStep === 'choose' && (
+          <>
+            <p className="slds-text-body_regular slds-m-bottom_medium">
+              We&apos;ll use your watch history to recommend the best plan.
+            </p>
+            <div className="import-service-options">
+              {IMPORT_SERVICES.map((service) => (
+                <button
+                  key={service.id}
+                  type="button"
+                  className="import-service-card browse-plan-card slds-box"
+                  onClick={() => {
+                    setImportService(service.id)
+                    setImportStep('connecting')
+                  }}
+                >
+                  <h3 className="browse-plan-card__name">{service.name}</h3>
+                  <p className="slds-text-body_small slds-text-color_weak">{service.description}</p>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+        {importStep === 'connecting' && importService && (
+          <>
+            <div className="slds-grid slds-grid_vertical-align-center" style={{ minHeight: 120, flexDirection: 'column' }}>
+              <div className="slds-spinner slds-spinner_medium" role="status" aria-label="Loading">
+                <span className="slds-assistive-text">Loading</span>
+                <div className="slds-spinner__dot-a" />
+                <div className="slds-spinner__dot-b" />
+              </div>
+              <p className="slds-m-top_medium slds-text-body_regular slds-text-color_weak">
+                Connecting to {IMPORT_SERVICES.find((s) => s.id === importService)?.name ?? importService}…
+              </p>
+            </div>
+            <p className="slds-m-top_medium">
+              <button type="button" className="slds-button slds-button_link" onClick={() => { setImportStep('choose'); setImportService(null) }}>
+                Back
+              </button>
+            </p>
+          </>
+        )}
+        {importStep === 'success' && importService && (
+          <>
+            <p className="slds-text-body_regular slds-m-bottom_medium">
+              We&apos;ve mapped your taste from {IMPORT_SERVICES.find((s) => s.id === importService)?.name ?? importService}. Here&apos;s your personalized plan.
+            </p>
+            <button type="button" className="slds-button slds-button_brand slds-button_stretch" onClick={handleImportSuccess}>
+              Get my plan
+            </button>
+          </>
+        )}
+      </Modal>
+
+      <Modal
+        open={browseModalOpen}
+        onClose={() => setBrowseModalOpen(false)}
+        title="Browse Popular Plans"
+      >
+        <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">
+          Choose a plan to get started.
         </p>
-        <p className="slds-text-body_small slds-text-color_weak slds-m-top_small">
-          This feature is coming soon. For now, type or choose an option above to get your bundle.
-        </p>
+        <div className="browse-plans-grid">
+          {BUNDLES.slice(0, 3).map((bundle, index) => (
+            <div
+              key={bundle.id}
+              className={`browse-plan-card slds-box ${index === 0 ? 'browse-plan-card--ai' : ''}`}
+            >
+              {index === 0 && <span className="browse-plan-card__badge">AI Recommended</span>}
+              <h3 className="browse-plan-card__name">{bundle.name}</h3>
+              <p className="browse-plan-card__price">{bundle.priceDisplay}</p>
+              <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">{bundle.pitch.slice(0, 80)}…</p>
+              <button
+                type="button"
+                className="slds-button slds-button_brand slds-button_stretch"
+                onClick={() => {
+                  setBrowseModalOpen(false)
+                  if (onBrowsePlanSelect) onBrowsePlanSelect(bundle.id)
+                  else onNext(bundle.name)
+                }}
+              >
+                Get Started
+              </button>
+            </div>
+          ))}
+        </div>
       </Modal>
     </motion.div>
   )

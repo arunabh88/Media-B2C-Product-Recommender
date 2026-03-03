@@ -43,7 +43,9 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
                   title="Close"
                   onClick={onClose}
                 >
-                  <span className="slds-button__icon slds-button__icon_left">{Icons.close}</span>
+                  <span className="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                    {Icons.close}
+                  </span>
                   <span className="slds-assistive-text">Close</span>
                 </button>
                 <h2 id="modal-title" className="slds-modal__title slds-hyphenate">

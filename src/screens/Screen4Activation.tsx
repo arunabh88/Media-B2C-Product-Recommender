@@ -1,18 +1,33 @@
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Icons } from '../components/Icons'
+import { Modal } from '../components/Modal'
+import type { BundleDefinition } from '../data/bundles'
 
 interface Screen4ActivationProps {
+  selectedBundle: BundleDefinition | null | undefined
   onWatchNow: () => void
 }
 
 const RAIL_ITEMS = [
-  { id: '1', title: 'Documentary: Racing the Sun', meta: '4K · Sports' },
-  { id: '2', title: 'HBO: House of the Dragon', meta: 'Drama · 4K' },
-  { id: '3', title: 'F1: Monaco GP Highlights', meta: 'Live · Sports' },
-  { id: '4', title: 'Nature: Planet Earth III', meta: '4K · Documentary' },
+  { id: '1', title: 'Documentary: Racing the Sun', meta: '4K · Sports', image: 'https://images.unsplash.com/photo-1568667256549-094345857637?w=400&h=225&fit=crop' },
+  { id: '2', title: 'HBO: House of the Dragon', meta: 'Drama · 4K', image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=225&fit=crop' },
+  { id: '3', title: 'F1: Monaco GP Highlights', meta: 'Live · Sports', image: 'https://images.unsplash.com/photo-1541443131876-44b03de101c5?w=400&h=225&fit=crop' },
+  { id: '4', title: 'Nature: Planet Earth III', meta: '4K · Documentary', image: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=225&fit=crop' },
 ]
 
-export function Screen4Activation({ onWatchNow }: Screen4ActivationProps) {
+export function Screen4Activation({ selectedBundle, onWatchNow }: Screen4ActivationProps) {
+  const bundleName = selectedBundle?.name ?? 'Your'
+  const topPicksRef = useRef<HTMLElement>(null)
+  const [manageModalOpen, setManageModalOpen] = useState(false)
+  const [contentReady, setContentReady] = useState(false)
+  const isColdStart = true
+
+  useEffect(() => {
+    const t = setTimeout(() => setContentReady(true), 1200)
+    return () => clearTimeout(t)
+  }, [])
+
   return (
     <motion.div
       key="screen4"
@@ -28,11 +43,11 @@ export function Screen4Activation({ onWatchNow }: Screen4ActivationProps) {
               <span className="slds-icon_container slds-icon-utility-success slds-m-bottom_small">
                 <span className="slds-icon slds-icon_large slds-icon-text-success">{Icons.success}</span>
               </span>
-              <h2 className="slds-text-heading_medium slds-m-bottom_x-small">You’re all set</h2>
+              <h2 className="slds-text-heading_medium slds-m-bottom_x-small">You&apos;re all set</h2>
               <p className="slds-text-body_regular slds-text-color_weak">
-                Your subscription is active. Start watching The Last of Us now.
+                Your subscription is active.
               </p>
-              <div className="slds-m-top_medium">
+              <div className="slds-m-top_medium slds-grid slds-gutters_small slds-wrap">
                 <button
                   type="button"
                   className="slds-button slds-button_brand"
@@ -40,9 +55,23 @@ export function Screen4Activation({ onWatchNow }: Screen4ActivationProps) {
                 >
                   Watch Now
                 </button>
+                <button
+                  type="button"
+                  className="slds-button slds-button_outline-brand"
+                  onClick={() => topPicksRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  Explore My Picks
+                </button>
+                <button
+                  type="button"
+                  className="slds-button slds-button_neutral"
+                  onClick={() => setManageModalOpen(true)}
+                >
+                  Manage My Plan
+                </button>
               </div>
               <p className="slds-text-body_small slds-text-color_weak slds-m-top_small">
-                You’re done in 2–3 clicks — under 30 seconds.
+                You&apos;re done in 2–3 clicks — under 30 seconds.
               </p>
             </div>
           </div>
@@ -50,29 +79,35 @@ export function Screen4Activation({ onWatchNow }: Screen4ActivationProps) {
       </div>
 
       {/* Watch Now rail - content related to initial prompt (Cold-start curating) */}
-      <section className="slds-m-top_large" aria-label="Top Picks for You">
-        <h3 className="slds-text-heading_small slds-m-bottom_medium">Top Picks for You</h3>
+      <section ref={topPicksRef} className="slds-m-top_large" aria-label="Top Picks for You">
+        <h3 className="slds-text-heading_small slds-m-bottom_x-small">Top Picks for You</h3>
+        {isColdStart && (
+          <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">Popular with viewers like you</p>
+        )}
+        {!contentReady ? (
+          <div className="slds-grid slds-gutters_small" style={{ minHeight: 200, alignItems: 'center' }}>
+            <div className="slds-spinner slds-spinner_medium" role="status" aria-label="Loading">
+              <span className="slds-assistive-text">Loading</span>
+              <div className="slds-spinner__dot-a" />
+              <div className="slds-spinner__dot-b" />
+            </div>
+            <p className="slds-text-body_regular slds-text-color_weak slds-m-left_small">Getting your recommendations ready…</p>
+          </div>
+        ) : (
         <div className="rail-grid">
           {RAIL_ITEMS.map((item, i) => (
             <motion.article
               key={item.id}
-              className="slds-card"
+              className="slds-card rail-tile"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * i, duration: 0.3 }}
               style={{ cursor: 'pointer' }}
-              whileHover={{ y: -4 }}
+              whileHover={{ scale: 1.05 }}
               onClick={onWatchNow}
             >
               <div className="slds-card__body slds-card__body_inner">
-                <div
-                  className="slds-media slds-media_center"
-                  style={{ aspectRatio: '16/9', background: 'var(--slds-g-neutral-90, #e5e5e5)', borderRadius: 4 }}
-                >
-                  <span className="slds-icon_container slds-icon-utility-play" style={{ opacity: 0.7 }}>
-                    {Icons.play}
-                  </span>
-                </div>
+                <div className="rail-tile__thumb" style={{ backgroundImage: `url(${item.image})` }} />
                 <h4 className="slds-text-body_small slds-m-top_x-small slds-truncate" title={item.title}>
                   {item.title}
                 </h4>
@@ -81,7 +116,28 @@ export function Screen4Activation({ onWatchNow }: Screen4ActivationProps) {
             </motion.article>
           ))}
         </div>
+        )}
       </section>
+
+      <Modal open={manageModalOpen} onClose={() => setManageModalOpen(false)} title="Manage My Plan">
+        <div className="slds-p-around_medium">
+          <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">Account overview (read-only)</p>
+          <dl className="slds-dl_horizontal slds-dl_inline">
+            <div className="slds-item slds-m-bottom_small">
+              <dt className="slds-dl_horizontal__label slds-text-body_small">Plan</dt>
+              <dd className="slds-dl_horizontal__detail slds-text-body_small">{bundleName}</dd>
+            </div>
+            <div className="slds-item slds-m-bottom_small">
+              <dt className="slds-dl_horizontal__label slds-text-body_small">Status</dt>
+              <dd className="slds-dl_horizontal__detail slds-text-body_small">Active</dd>
+            </div>
+            <div className="slds-item">
+              <dt className="slds-dl_horizontal__label slds-text-body_small">Next billing</dt>
+              <dd className="slds-dl_horizontal__detail slds-text-body_small">{selectedBundle?.priceDisplay ?? '—'}</dd>
+            </div>
+          </dl>
+        </div>
+      </Modal>
     </motion.div>
   )
 }

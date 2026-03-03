@@ -3,6 +3,7 @@ import { Icons } from './Icons'
 const STEPS = [
   { value: 'discovery', label: 'Discover' },
   { value: 'bundle', label: 'Your Bundle' },
+  { value: 'validation', label: 'Validate' },
   { value: 'checkout', label: 'Checkout' },
   { value: 'activation', label: 'Watch' },
 ] as const
@@ -22,7 +23,7 @@ export function ProgressIndicator({ currentStep }: ProgressIndicatorProps) {
       role="progressbar"
       aria-valuenow={currentIndex + 1}
       aria-valuemin={1}
-      aria-valuemax={4}
+      aria-valuemax={5}
     >
       <ul className="slds-progress-indicator" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 0 }}>
         {STEPS.map((step, index) => {

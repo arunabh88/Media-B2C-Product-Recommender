@@ -1,17 +1,42 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { Icons } from '../components/Icons'
+import { Modal } from '../components/Modal'
+import type { BundleDefinition } from '../data/bundles'
 
 interface Screen3CheckoutProps {
+  selectedBundle: BundleDefinition | null | undefined
   onNext: () => void
+  onBack?: () => void
+  registerPrimaryAction?: (fn: () => void) => void
 }
 
-const LINE_ITEMS = [
-  { label: 'The Ultimate Cinephile Pack', value: '$64.99/mo' },
-  { label: 'Mobile Customer Credit', value: '-$10.00' },
-]
 const TOTAL_LABEL = 'Total today'
-const TOTAL_VALUE = '$54.99/mo'
 
-export function Screen3Checkout({ onNext }: Screen3CheckoutProps) {
+export function Screen3Checkout({ selectedBundle, onNext, onBack, registerPrimaryAction }: Screen3CheckoutProps) {
+  const bundleName = selectedBundle?.name ?? 'Your plan'
+  const totalValue = selectedBundle?.priceDisplay ?? '$54.99/mo'
+  const discountItem = selectedBundle?.breakdown?.find((b) => b.isDiscount)
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false)
+  const [paymentTab, setPaymentTab] = useState<'card' | 'upi'>('card')
+  const [processing, setProcessing] = useState(false)
+  const [paymentFailed, setPaymentFailed] = useState(false)
+
+  const handleConfirmSubscribe = () => {
+    setProcessing(true)
+    setTimeout(() => { setProcessing(false); onNext() }, 1800)
+  }
+  const handlePayInModal = () => {
+    setPaymentFailed(false)
+    if (Math.random() < 0.25) { setPaymentFailed(true); return }
+    setPaymentModalOpen(false)
+    onNext()
+  }
+
+  useEffect(() => {
+    registerPrimaryAction?.(handleConfirmSubscribe)
+  }, [registerPrimaryAction])
+
   return (
     <motion.div
       key="screen3"
@@ -20,29 +45,49 @@ export function Screen3Checkout({ onNext }: Screen3CheckoutProps) {
       transition={{ duration: 0.35 }}
       style={{ maxWidth: 420, margin: '0 auto' }}
     >
+      {onBack && (
+        <div className="slds-m-bottom_medium">
+          <button
+            type="button"
+            className="back-link slds-button slds-button_link slds-p-left_none"
+            onClick={onBack}
+            style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <span className="slds-icon_container" style={{ lineHeight: 1 }}>{Icons.chevronLeft}</span>
+            Back to plans
+          </button>
+        </div>
+      )}
+
       <h2 className="slds-text-heading_medium slds-m-bottom_medium">Checkout</h2>
 
       <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
-        Signed in with Apple — we’ve pre-filled your details and confirmed 18+.
+        Signed in with Apple — we&apos;ve pre-filled your details and confirmed 18+.
       </p>
 
       <div className="slds-summary-detail slds-m-bottom_large">
         <div className="slds-summary-detail__content">
           <dl className="slds-dl_horizontal slds-dl_inline">
-            {LINE_ITEMS.map((item) => (
-              <div key={item.label} className="slds-item slds-m-bottom_small">
-                <dt className="slds-dl_horizontal__label slds-text-body_small">{item.label}</dt>
+            <div className="slds-item slds-m-bottom_small">
+              <dt className="slds-dl_horizontal__label slds-text-body_small">{bundleName}</dt>
+              <dd className="slds-dl_horizontal__detail slds-tile__meta slds-text-body_small">
+                {totalValue}
+              </dd>
+            </div>
+            {discountItem && (
+              <div className="slds-item slds-m-bottom_small slds-theme_success">
+                <dt className="slds-dl_horizontal__label slds-text-body_small">{discountItem.label}</dt>
                 <dd className="slds-dl_horizontal__detail slds-tile__meta slds-text-body_small">
-                  {item.value}
+                  {discountItem.value}
                 </dd>
               </div>
-            ))}
+            )}
             <div className="slds-item slds-m-top_small slds-p-top_small" style={{ borderTop: '1px solid #e5e5e5' }}>
               <dt className="slds-dl_horizontal__label slds-text-body_regular slds-text-title">
                 {TOTAL_LABEL}
               </dt>
               <dd className="slds-dl_horizontal__detail slds-tile__meta slds-text-heading_small">
-                {TOTAL_VALUE}
+                {totalValue}
               </dd>
             </div>
           </dl>
@@ -50,18 +95,29 @@ export function Screen3Checkout({ onNext }: Screen3CheckoutProps) {
       </div>
 
       <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
-        Pay with your saved method or choose below.
+        Pay with your saved method or choose below. Secure payment.
       </p>
       <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">
-        We’ve defaulted to Apple Pay — confirm with a double-click.
+        We&apos;ve defaulted to Apple Pay — confirm with a double-click.
       </p>
 
+      {processing ? (
+        <div className="slds-grid slds-grid_vertical-align-center" style={{ minHeight: 120, flexDirection: 'column' }}>
+          <div className="slds-spinner slds-spinner_medium" role="status" aria-label="Loading">
+            <span className="slds-assistive-text">Loading</span>
+            <div className="slds-spinner__dot-a" />
+            <div className="slds-spinner__dot-b" />
+          </div>
+          <p className="slds-m-top_medium slds-text-body_regular slds-text-color_weak">Securing your subscription…</p>
+        </div>
+      ) : (
+        <>
       <div className="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
         <motion.button
           type="button"
           className="slds-button slds-button_neutral slds-size_1-of-1 slds-m-bottom_small"
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-          onClick={onNext}
+          onClick={handleConfirmSubscribe}
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
         >
@@ -74,7 +130,7 @@ export function Screen3Checkout({ onNext }: Screen3CheckoutProps) {
           type="button"
           className="slds-button slds-button_outline-brand slds-size_1-of-1"
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-          onClick={onNext}
+          onClick={handleConfirmSubscribe}
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
         >
@@ -88,9 +144,79 @@ export function Screen3Checkout({ onNext }: Screen3CheckoutProps) {
         </motion.button>
       </div>
 
-      <button type="button" className="slds-button slds-button_link slds-text-body_small" onClick={onNext}>
-        Use card or other payment method
+      <button type="button" className="slds-button slds-button_link slds-text-body_small" onClick={() => setPaymentModalOpen(true)}>
+        Use Another Payment Method
       </button>
+        </>
+      )}
+
+      <Modal open={paymentModalOpen} onClose={() => setPaymentModalOpen(false)} title="Pay with card or UPI">
+        <div className="payment-modal-tabs">
+          <div className="slds-tabs_default">
+            <ul className="slds-tabs_default__nav" role="tablist">
+              <li className={`slds-tabs_default__item ${paymentTab === 'card' ? 'slds-is-active' : ''}`} role="presentation">
+                <button type="button" className="slds-tabs_default__link" role="tab" onClick={() => setPaymentTab('card')}>Card</button>
+              </li>
+              <li className={`slds-tabs_default__item ${paymentTab === 'upi' ? 'slds-is-active' : ''}`} role="presentation">
+                <button type="button" className="slds-tabs_default__link" role="tab" onClick={() => setPaymentTab('upi')}>UPI</button>
+              </li>
+            </ul>
+          </div>
+          {paymentTab === 'card' && (
+            <div className="slds-p-around_medium payment-form">
+              <div className="slds-form-element slds-m-bottom_small">
+                <label className="slds-form-element__label" htmlFor="card-number">Card number</label>
+                <input id="card-number" type="text" className="slds-input" placeholder="1234 5678 9012 3456" maxLength={19} />
+              </div>
+              <div className="slds-form-element slds-m-bottom_small">
+                <label className="slds-form-element__label" htmlFor="card-name">Name on card</label>
+                <input id="card-name" type="text" className="slds-input" placeholder="John Doe" />
+              </div>
+              <div className="slds-grid slds-gutters_small">
+                <div className="slds-col slds-size_1-of-2">
+                  <div className="slds-form-element slds-m-bottom_small">
+                    <label className="slds-form-element__label" htmlFor="card-exp">Expiry</label>
+                    <input id="card-exp" type="text" className="slds-input" placeholder="MM/YY" maxLength={5} />
+                  </div>
+                </div>
+                <div className="slds-col slds-size_1-of-2">
+                  <div className="slds-form-element slds-m-bottom_small">
+                    <label className="slds-form-element__label" htmlFor="card-cvc">CVC</label>
+                    <input id="card-cvc" type="text" className="slds-input" placeholder="123" maxLength={4} />
+                  </div>
+                </div>
+              </div>
+              <button type="button" className="slds-button slds-button_brand slds-button_stretch slds-m-top_small" onClick={handlePayInModal}>Pay {totalValue}</button>
+              {paymentFailed && (
+                <div className="slds-m-top_small slds-theme_error" style={{ padding: '0.5rem', borderRadius: 4 }}>
+                  <p className="slds-text-body_small">That didn&apos;t go through. Want to try again or switch methods?</p>
+                  <button type="button" className="slds-button slds-button_neutral slds-m-right_x-small slds-m-top_x-small" onClick={handlePayInModal}>Retry</button>
+                  <button type="button" className="slds-button slds-button_link slds-m-top_x-small" onClick={() => setPaymentFailed(false)}>Switch method</button>
+                </div>
+              )}
+            </div>
+          )}
+          {paymentTab === 'upi' && (
+            <div className="slds-p-around_medium payment-upi">
+              <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">Scan the QR code with your UPI app to pay.</p>
+              <div className="upi-qr-placeholder" aria-hidden="true">
+                <span className="upi-qr-placeholder-inner">QR Code</span>
+                <span className="slds-text-body_small slds-text-color_weak">Placeholder — scan to pay</span>
+              </div>
+              <p className="slds-text-body_small slds-m-top_small slds-text-color_weak">Or enter your UPI ID below (e.g. name@paytm).</p>
+              <input type="text" className="slds-input slds-m-top_x-small" placeholder="UPI ID" />
+              <button type="button" className="slds-button slds-button_brand slds-button_stretch slds-m-top_small" onClick={handlePayInModal}>Pay {totalValue}</button>
+              {paymentFailed && (
+                <div className="slds-m-top_small slds-theme_error" style={{ padding: '0.5rem', borderRadius: 4 }}>
+                  <p className="slds-text-body_small">That didn&apos;t go through. Want to try again or switch methods?</p>
+                  <button type="button" className="slds-button slds-button_neutral slds-m-right_x-small slds-m-top_x-small" onClick={handlePayInModal}>Retry</button>
+                  <button type="button" className="slds-button slds-button_link slds-m-top_x-small" onClick={() => setPaymentFailed(false)}>Switch method</button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </Modal>
     </motion.div>
   )
 }
