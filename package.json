@@ -10,7 +10,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "heroku-postbuild": "npm run build",
-    "start": "serve dist -s -l ${PORT:-3000}",
+    "start": "serve dist -s -l 0.0.0.0:${PORT:-3000}",
     "lint": "eslint .",
     "preview": "vite preview"
   },
