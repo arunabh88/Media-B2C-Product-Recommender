@@ -149,13 +149,22 @@ export default function App() {
         onClose={() => { setPriceBreakdownBundleId(null); setBreakdownPromoId(null) }}
         title={breakdownBundle ? `Price breakdown — ${breakdownBundle.name}` : 'Price breakdown'}
         footer={
-          <button
-            type="button"
-            className="slds-button slds-button_brand"
-            onClick={() => { setPriceBreakdownBundleId(null); setBreakdownPromoId(null) }}
-          >
-            Done
-          </button>
+          <>
+            <button
+              type="button"
+              className="slds-button slds-button_neutral"
+              onClick={() => { setPriceBreakdownBundleId(null); setBreakdownPromoId(null) }}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="slds-button slds-button_brand"
+              onClick={() => { setPriceBreakdownBundleId(null); setBreakdownPromoId(null) }}
+            >
+              Done
+            </button>
+          </>
         }
       >
         {breakdownBundle && (
@@ -197,20 +206,26 @@ function PriceBreakdownContent({
         ))}
       </div>
       {promos.length > 0 && (
-        <div className="price-breakdown-promo-section">
-          <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_x-small">Promo</p>
-          <div className="slds-button-group slds-m-bottom_small" role="group">
-            {promos.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                className={`slds-button ${effectivePromo?.id === p.id ? 'slds-button_brand' : 'slds-button_neutral'}`}
-                onClick={() => onSelectPromo(p.id)}
-              >
-                {p.label}
-              </button>
-            ))}
+        <div className="price-breakdown-row price-breakdown-promo-row">
+          <div className="price-breakdown-promo-select-wrap">
+            <label id="price-breakdown-promo-label" className="price-breakdown-promo-label">Promo Applied</label>
+            <select
+              id="price-breakdown-promo"
+              className="slds-select price-breakdown-promo-select"
+              value={effectivePromo?.id ?? ''}
+              onChange={(e) => onSelectPromo(e.target.value)}
+              aria-labelledby="price-breakdown-promo-label"
+            >
+              {promos.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
           </div>
+          <span className="price-breakdown-value">
+            {effectivePromo?.isDiscount ? effectivePromo.value : '—'}
+          </span>
         </div>
       )}
       <div className="price-breakdown-separator" />

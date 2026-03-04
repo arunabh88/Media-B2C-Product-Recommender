@@ -112,7 +112,7 @@ export function Screen2Bundle({ prompt, initialBestFitBundleId, onNext, onPriceB
                 <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">We picked the most value-optimized option for you.</p>
               )}
               <BestFitCard bundle={bestFit} whyOpen={whyOpen} onWhyToggle={() => setWhyOpen((v) => !v)} onContinue={() => onNext(bestFit.id)} onPriceBreakdown={() => onPriceBreakdown(bestFit.id)} />
-              <div className="slds-m-top_small">
+              <div className="slds-m-top_small bundle-secondary-actions">
                 <button type="button" className="slds-button slds-button_neutral" onClick={() => setShowAlternates((v) => !v)}>{showAlternates ? 'Hide other options' : 'See Other Options'}</button>
                 {onBack && <button type="button" className="slds-button slds-button_link slds-m-left_small" onClick={onBack}>Change Preferences</button>}
               </div>
@@ -136,6 +136,7 @@ export function Screen2Bundle({ prompt, initialBestFitBundleId, onNext, onPriceB
 
 function BestFitCard({ bundle, whyOpen, onWhyToggle, onContinue, onPriceBreakdown }: { bundle: BundleDefinition; whyOpen: boolean; onWhyToggle: () => void; onContinue: () => void; onPriceBreakdown: () => void }) {
   const explanation = bundle.aiExplanation ?? bundle.deviceNote ?? 'Based on your preferences and device.'
+  const hasPromo = bundle.breakdown.some((i) => i.isDiscount)
   return (
     <article className="slds-card bundle-card">
       <div className="slds-card__header slds-grid">
@@ -146,6 +147,9 @@ function BestFitCard({ bundle, whyOpen, onWhyToggle, onContinue, onPriceBreakdow
           <div className="slds-media__body">
             <h3 className="slds-card__header-title slds-truncate slds-text-heading_small">{bundle.name}</h3>
             <span className="slds-badge slds-badge_lightest bundle-promo-badge">Best Fit</span>
+            {hasPromo && (
+              <span className="slds-badge slds-badge_lightest slds-theme_success bundle-promo-badge">Promo code applied</span>
+            )}
           </div>
         </header>
       </div>
@@ -157,9 +161,6 @@ function BestFitCard({ bundle, whyOpen, onWhyToggle, onContinue, onPriceBreakdow
             <span key={addon} className="slds-badge slds-m-right_x-small slds-m-bottom_x-small" style={{ fontSize: '0.75rem' }}>{addon}</span>
           ))}
         </div>
-        <div className="slds-box slds-box_x-small slds-theme_success slds-m-bottom_small">
-          <span className="slds-text-body_small"><strong>{bundle.discountLabel}</strong> {bundle.discountAmount}</span>
-        </div>
         {bundle.deviceNote && (
           <div className="slds-box slds-box_x-small slds-m-bottom_small" style={{ background: 'var(--slds-g-neutral-95, #f3f3f3)' }}>
             <span className="slds-text-body_small slds-text-color_weak">{bundle.deviceNote}</span>
@@ -169,12 +170,12 @@ function BestFitCard({ bundle, whyOpen, onWhyToggle, onContinue, onPriceBreakdow
           <button type="button" className="slds-button slds-button_stretch slds-button_link slds-text-body_small" onClick={onWhyToggle} aria-expanded={whyOpen}>Why this plan? {whyOpen ? '−' : '+'}</button>
           {whyOpen && <p className="slds-text-body_small slds-text-color_weak slds-m-top_x-small slds-p-left_small">{explanation}</p>}
         </div>
-        <button type="button" className="slds-button slds-button_stretch slds-button_link slds-text-body_small" onClick={onPriceBreakdown}>View price breakdown</button>
       </div>
       <div className="slds-card__footer">
         <p className="slds-text-body_small slds-m-bottom_x-small slds-text-color_weak">Total</p>
-        <p className="slds-text-heading_medium slds-m-bottom_small">{bundle.priceDisplay}</p>
-        <button type="button" className="slds-button slds-button_brand slds-button_stretch" onClick={onContinue}>Continue</button>
+        <p className="slds-text-heading_medium slds-m-bottom_x-small">{bundle.priceDisplay}</p>
+        <button type="button" className="slds-button slds-button_stretch slds-button_link slds-text-body_small" onClick={onPriceBreakdown}>View price breakdown</button>
+        <button type="button" className="slds-button slds-button_brand slds-button_stretch slds-m-top_small" onClick={onContinue}>Continue</button>
       </div>
     </article>
   )
@@ -203,7 +204,7 @@ function BundleCard({
           <div className="slds-media__body">
             <h3 className="slds-card__header-title slds-truncate slds-text-heading_small">{bundle.name}</h3>
             {hasPromo && (
-              <span className="slds-badge slds-badge_lightest slds-theme_success bundle-promo-badge">Promo Applied</span>
+              <span className="slds-badge slds-badge_lightest slds-theme_success bundle-promo-badge">Promo code applied</span>
             )}
           </div>
         </header>
@@ -222,11 +223,6 @@ function BundleCard({
             </span>
           ))}
         </div>
-        <div className="slds-box slds-box_x-small slds-theme_success slds-m-bottom_small">
-          <span className="slds-text-body_small">
-            <strong>{bundle.discountLabel}</strong> {bundle.discountAmount}
-          </span>
-        </div>
         {bundle.deviceNote && (
           <div className="slds-box slds-box_x-small slds-m-bottom_small" style={{ background: 'var(--slds-g-neutral-95, #f3f3f3)' }}>
             <span className="slds-text-body_small slds-text-color_weak">{bundle.deviceNote}</span>
@@ -235,7 +231,7 @@ function BundleCard({
       </div>
       <div className="slds-card__footer">
         <p className="slds-text-body_small slds-m-bottom_x-small slds-text-color_weak">Total</p>
-        <p className="slds-text-heading_medium slds-m-bottom_small">{bundle.priceDisplay}</p>
+        <p className="slds-text-heading_medium slds-m-bottom_x-small">{bundle.priceDisplay}</p>
         <button
           type="button"
           className="slds-button slds-button_stretch slds-button_link slds-text-body_small"
@@ -245,7 +241,7 @@ function BundleCard({
         </button>
         <button
           type="button"
-          className="slds-button slds-button_brand slds-button_stretch"
+          className="slds-button slds-button_brand slds-button_stretch slds-m-top_small"
           onClick={onGetStarted}
         >
           Get Started

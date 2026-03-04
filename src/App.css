@@ -839,9 +839,23 @@ html, body, #root {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+.bundle-secondary-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.bundle-secondary-actions .slds-button_link {
+  margin-left: 0;
+}
 .bundle-card .bundle-promo-badge {
   font-size: 0.7rem;
   margin-top: 2px;
+}
+.bundle-card .bundle-promo-badge.slds-theme_success {
+  background-color: var(--slds-g-success-95, #e8f4ea);
+  color: var(--slds-g-success-40, #2e844a);
+  border-color: var(--slds-g-success-90, #c9e5cd);
 }
 
 /* Top Picks rail: responsive grid */
@@ -887,8 +901,35 @@ html, body, #root {
   font-size: 0.875rem;
   font-weight: 500;
 }
-.price-breakdown-promo-section {
-  margin-top: 0.5rem;
+.price-breakdown-promo-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+  margin-top: 0.25rem;
+}
+.price-breakdown-promo-select-wrap {
+  flex: 1;
+  max-width: 14rem;
+}
+.price-breakdown-promo-label {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--slds-g-neutral-30, #444);
+  margin-bottom: 0.25rem;
+}
+.price-breakdown-promo-select {
+  width: 100%;
+  font-size: 0.875rem;
+  padding: 0.35rem 2rem 0.35rem 0.5rem;
+  border: 1px solid var(--slds-g-neutral-85, #ccc);
+  border-radius: 4px;
+  background-color: var(--slds-g-neutral-100, #fff);
+  color: var(--slds-g-neutral-10, #181818);
+}
+.price-breakdown-promo-row .price-breakdown-value {
+  min-width: 5rem;
+  text-align: right;
 }
 .price-breakdown-separator {
   height: 0;
