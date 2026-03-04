@@ -57,16 +57,51 @@ export function Screen2Bundle({ prompt, initialBestFitBundleId, onNext, onPriceB
         key="screen2-loading"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="slds-grid slds-grid_vertical-align-center"
-        style={{ minHeight: '60vh', flexDirection: 'column' }}
+        className="agentic-loader"
+        role="status"
+        aria-label="Agent is finding your best plan"
       >
-        <div className="slds-spinner slds-spinner_medium" role="status" aria-label="Loading">
-          <span className="slds-assistive-text">Loading</span>
-          <div className="slds-spinner__dot-a" />
-          <div className="slds-spinner__dot-b" />
-        </div>
-        <p className="slds-m-top_medium slds-text-body_regular slds-text-color_weak">
-          Finding plans you&apos;ll love…
+        <motion.div
+          className="agentic-loader__sparkle"
+          animate={{
+            scale: [1, 1.12, 1],
+            opacity: [0.9, 1, 0.9],
+            rotate: [0, 4, -2, 0],
+          }}
+          transition={{
+            duration: 2.2,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        >
+          <span className="agentic-loader__sparkle-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="slds-icon slds-icon_utility" aria-hidden="true" style={{ width: '100%', height: '100%' }}>
+              <motion.g
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
+              >
+                <path d="M12 1l1.5 4.5L18 7l-4.5 1.5L12 13l-1.5-4.5L6 7l4.5-1.5L12 1z" />
+              </motion.g>
+              <motion.g
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+              >
+                <path d="M5 16l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z" />
+              </motion.g>
+              <motion.g
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+              >
+                <path d="M19 19l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75.75-2.25z" />
+              </motion.g>
+            </svg>
+          </span>
+        </motion.div>
+        <p className="agentic-loader__line1">
+          <strong>Agent</strong> is understanding your preference
+        </p>
+        <p className="agentic-loader__line2">
+          Finding best fit plan you will love
         </p>
       </motion.div>
     )
@@ -94,22 +129,22 @@ export function Screen2Bundle({ prompt, initialBestFitBundleId, onNext, onPriceB
         </div>
       )}
 
-      <h2 className="slds-text-heading_medium slds-m-bottom_small">Best-Fit Plan</h2>
-      <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">Based on: &ldquo;{prompt}&rdquo;</p>
+      <h2 className="bundle-best-fit-title slds-m-bottom_small">Best-Fit Plan</h2>
 
       <div id="bundle-cards" className="bundle-grid" style={{ gridTemplateColumns: '1fr' }}>
         {orderedBundles[0] && (() => {
           const bestFit = orderedBundles[0]
           const lowConfidence = bestFit.lowConfidence ?? (scoreRelevance(bestFit, prompt) === 0 && !initialBestFitBundleId)
+          const subtitleText = bestFit.priceSensitivityDetected
+            ? `Based on: "${prompt}". We picked the most value-optimized option for you.`
+            : `Based on: "${prompt}"`
           return (
             <>
+              <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">{subtitleText}</p>
               {lowConfidence && onBack && (
                 <div className="slds-box slds-box_x-small slds-m-bottom_small" style={{ background: 'var(--slds-g-neutral-95, #f3f3f3)' }}>
                   <p className="slds-text-body_small">Not sure we nailed it? <button type="button" className="slds-button slds-button_link slds-button_inline" onClick={onBack}>Tweak this in one tap</button>.</p>
                 </div>
-              )}
-              {bestFit.priceSensitivityDetected && (
-                <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">We picked the most value-optimized option for you.</p>
               )}
               <BestFitCard bundle={bestFit} whyOpen={whyOpen} onWhyToggle={() => setWhyOpen((v) => !v)} onContinue={() => onNext(bestFit.id)} onPriceBreakdown={() => onPriceBreakdown(bestFit.id)} />
               <div className="slds-m-top_small bundle-secondary-actions">
@@ -118,7 +153,7 @@ export function Screen2Bundle({ prompt, initialBestFitBundleId, onNext, onPriceB
               </div>
               {showAlternates && orderedBundles.length > 1 && (
                 <div className="slds-m-top_large" style={{ gridColumn: '1' }}>
-                  <h3 className="slds-text-heading_small slds-m-bottom_small">Other plans</h3>
+                  <h3 className="bundle-other-plans-title slds-m-bottom_small">Other plans</h3>
                   <div className="bundle-grid">
                     {orderedBundles.slice(1, 4).map((b) => (
                       <BundleCard key={b.id} bundle={b} onGetStarted={() => onNext(b.id)} onPriceBreakdown={() => onPriceBreakdown(b.id)} />

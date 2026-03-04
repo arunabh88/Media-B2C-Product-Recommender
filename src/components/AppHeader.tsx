@@ -115,8 +115,11 @@ export function AppHeader({ currentStep, onLogoClick, onHomeClick, onFindPlansCl
           </nav>
         </div>
 
-        {/* Right: Notification, Help, Profile */}
+        {/* Right: Agent Astro, Notification, Help, Profile */}
         <div className="app-header__right">
+          <button type="button" className="app-header__icon-btn" aria-label="Agent Astro">
+            <img src="/agent-astro.png" alt="" className="app-header__icon-img" width={20} height={20} />
+          </button>
           <button type="button" className="app-header__icon-btn" aria-label="Notifications">
             {Icons.bell}
           </button>

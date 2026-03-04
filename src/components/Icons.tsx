@@ -59,6 +59,24 @@ export const Icons = {
       <path fill="currentColor" d="M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2z" />
     </svg>
   ),
+  /** SLDS utility: sparkles – multiple stars (from Lightning Design System icon library) */
+  sparkles: (
+    <svg className="slds-icon slds-icon_utility" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 1l1.5 4.5L18 7l-4.5 1.5L12 13l-1.5-4.5L6 7l4.5-1.5L12 1z" />
+      <path d="M5 16l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z" opacity="0.8" />
+      <path d="M19 19l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75.75-2.25z" opacity="0.9" />
+    </svg>
+  ),
+  /** SLDS custom: agent_astro – Astro mascot (round head, ears, hair tuft, square sunglasses) */
+  agentAstro: (
+    <svg className="slds-icon slds-icon-custom" viewBox="0 0 52 52" fill="currentColor" aria-hidden="true">
+      <path d="M26 14a14 14 0 0 1 0 28 14 14 0 0 1 0-28z" />
+      <path d="M12 16a5 5 0 0 1 0 10 5 5 0 0 1 0-10z" />
+      <path d="M40 16a5 5 0 0 1 0 10 5 5 0 0 1 0-10z" />
+      <path d="M23 18l3-7 3 7-2 2-1-1.5-1 1.5z" />
+      <path d="M17 24h7v6h-7zM24 26h6v2h-6zM31 24h7v6h-7z" />
+    </svg>
+  ),
   /** SLDS utility: notification (bell) – same family as help, user */
   bell: (
     <svg className="slds-icon slds-icon_utility" viewBox="0 0 52 52" aria-hidden="true">

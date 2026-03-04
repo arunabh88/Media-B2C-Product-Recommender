@@ -73,10 +73,9 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
     }
   }
   const [listening, setListening] = useState(false)
-  const [processing, setProcessing] = useState(false)
   const [emptyError, setEmptyError] = useState(false)
   const [micDenied, setMicDenied] = useState(false)
-  const [broadClarification, setBroadClarification] = useState(false)
+  const [, setBroadClarification] = useState(false)
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
   const promptWhenStartedRef = useRef('')
   const finalTranscriptRef = useRef('')
@@ -174,22 +173,13 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
     }
     const isBroad = /^(everything|anything|all)$/i.test(value) || value.length < 3
     if (isBroad) setBroadClarification(true)
-    setProcessing(true)
-    setTimeout(() => {
-      setProcessing(false)
-      setBroadClarification(false)
-      onNext(value || INSPIRATION_CHIPS[0])
-    }, 1500)
+    onNext(value || INSPIRATION_CHIPS[0])
   }
 
   const handleChipClick = (label: string) => {
     setPrompt(label)
     setEmptyError(false)
-    setProcessing(true)
-    setTimeout(() => {
-      setProcessing(false)
-      onNext(label)
-    }, 1200)
+    onNext(label)
   }
 
   return (
@@ -202,24 +192,7 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
       className="slds-grid slds-grid_vertical slds-grid_vertical-align-center"
       style={{ minHeight: '70vh', padding: '2rem 0' }}
     >
-      {processing ? (
-        <div className="slds-grid slds-grid_vertical-align-center" style={{ minHeight: '40vh', flexDirection: 'column' }}>
-          <div className="slds-spinner slds-spinner_medium" role="status" aria-label="Loading">
-            <span className="slds-assistive-text">Loading</span>
-            <div className="slds-spinner__dot-a" />
-            <div className="slds-spinner__dot-b" />
-          </div>
-          <p className="slds-m-top_medium slds-text-body_regular slds-text-color_weak">
-            Understanding your preferences…
-          </p>
-          {broadClarification && (
-            <p className="slds-m-top_small slds-text-body_small slds-text-color_weak">
-              Got it — we&apos;ll start broad and fine-tune later.
-            </p>
-          )}
-        </div>
-      ) : (
-        <>
+      <>
       <div className="slds-text-align_center slds-m-bottom_large">
         <h1 className="slds-text-heading_large slds-m-bottom_small discovery-heading">
           What do you love to watch?
@@ -333,8 +306,6 @@ export function Screen1Discovery({ initialPrompt = '', onNext, onBrowsePlanSelec
       </form>
 
         </>
-      )}
-
       <Modal
         open={importModalOpen}
         onClose={handleImportModalClose}

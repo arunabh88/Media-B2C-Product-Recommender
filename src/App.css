@@ -232,12 +232,21 @@ html, body, #root {
 }
 .app-header__icon-btn .slds-icon,
 .app-header__icon-btn .slds-icon_utility,
-.app-header__icon-btn .slds-icon_action {
+.app-header__icon-btn .slds-icon_action,
+.app-header__icon-btn .slds-icon-custom {
   width: 1rem;
   height: 1rem;
   min-width: 1rem;
   min-height: 1rem;
   fill: currentColor;
+}
+.app-header__icon-btn .app-header__icon-img {
+  width: 1rem;
+  height: 1rem;
+  min-width: 1rem;
+  min-height: 1rem;
+  object-fit: contain;
+  display: block;
 }
 .app-header__brand {
   display: flex;
@@ -345,7 +354,14 @@ html, body, #root {
   }
   .app-header__icon-btn .slds-icon,
   .app-header__icon-btn .slds-icon_utility,
-  .app-header__icon-btn .slds-icon_action {
+  .app-header__icon-btn .slds-icon_action,
+  .app-header__icon-btn .slds-icon-custom {
+    width: 0.875rem;
+    height: 0.875rem;
+    min-width: 0.875rem;
+    min-height: 0.875rem;
+  }
+  .app-header__icon-btn .app-header__icon-img {
     width: 0.875rem;
     height: 0.875rem;
     min-width: 0.875rem;
@@ -828,6 +844,46 @@ html, body, #root {
   background: none !important;
 }
 
+/* Agentic loader: step 1 → step 2 (sparkle + agent messaging) */
+.agentic-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+.agentic-loader__sparkle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.agentic-loader__sparkle-icon {
+  display: inline-flex;
+  width: 3rem;
+  height: 3rem;
+  color: var(--slds-g-brand-primary, #0176d3);
+  filter: drop-shadow(0 0 8px rgba(1, 118, 211, 0.35));
+}
+.agentic-loader__sparkle-icon .slds-icon,
+.agentic-loader__sparkle-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+.agentic-loader__line1 {
+  font-size: 1rem;
+  color: var(--slds-g-neutral-30, #444);
+  margin: 0 0 0.35rem;
+}
+.agentic-loader__line2 {
+  font-size: 0.9375rem;
+  color: var(--slds-g-neutral-50, #706e6b);
+  margin: 0;
+}
+
 /* Bundle selection: grid of cards */
 .bundle-grid {
   display: grid;
@@ -848,6 +904,11 @@ html, body, #root {
 .bundle-secondary-actions .slds-button_link {
   margin-left: 0;
 }
+.bundle-other-plans-title,
+.bundle-best-fit-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
 .bundle-card .bundle-promo-badge {
   font-size: 0.7rem;
   margin-top: 2px;
@@ -856,6 +917,59 @@ html, body, #root {
   background-color: var(--slds-g-success-95, #e8f4ea);
   color: var(--slds-g-success-40, #2e844a);
   border-color: var(--slds-g-success-90, #c9e5cd);
+}
+
+/* Validation screen: lighter badges (Device detected, Network speed, etc.) */
+.validation-badge {
+  background-color: var(--slds-g-success-95, #e8f4ea);
+  color: var(--slds-g-success-50, #3e9a4a);
+  border: 1px solid var(--slds-g-success-90, #c9e5cd);
+}
+
+/* Validation screen: sequential steps list and device block */
+.validation-device-block {
+  padding: 0.75rem 0;
+}
+.validation-steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.validation-step-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  min-height: 2rem;
+}
+.validation-step-tick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  min-width: 1.25rem;
+  flex-shrink: 0;
+}
+.validation-step-tick-icon .slds-icon {
+  width: 1rem;
+  height: 1rem;
+  fill: var(--slds-g-success-50, #3e9a4a);
+}
+.validation-step-pending {
+  font-size: 0.75rem;
+  color: var(--slds-g-neutral-60, #706e6b);
+}
+.validation-step-label--checking {
+  color: var(--slds-g-neutral-60, #706e6b);
+  font-size: 0.875rem;
+}
+.validation-step-label {
+  font-size: 0.875rem;
+  color: var(--slds-g-neutral-30, #444);
+}
+.validation-step-label--done {
+  color: var(--slds-g-neutral-10, #181818);
+  font-weight: 500;
 }
 
 /* Top Picks rail: responsive grid */
@@ -1232,4 +1346,65 @@ section.slds-modal .slds-modal__container,
 }
 .import-service-card .browse-plan-card__name {
   margin-bottom: 0.25rem;
+}
+
+/* Change device modal: SLDS-style checkboxes (active/inactive, centered check) */
+.slds-form-element__control .slds-checkbox {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 0.25rem;
+  margin-top: 0.25rem;
+}
+.slds-form-element__control .slds-checkbox input[type="checkbox"] {
+  width: 1px;
+  height: 1px;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  pointer-events: auto;
+}
+/* Inactive state: SLDS faux box */
+.slds-form-element__control .slds-checkbox_faux {
+  width: 1rem;
+  height: 1rem;
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+  flex-shrink: 0;
+  border-radius: var(--slds-c-checkbox-radius-border, 0.125rem);
+  border: 1px solid var(--slds-c-checkbox-color-border, #c9c9c9);
+  background-color: var(--slds-c-checkbox-color-background, #fff);
+  box-shadow: var(--slds-c-checkbox-shadow, none);
+  transition: border 0.1s linear, background-color 0.1s linear;
+}
+/* Active/checked state: SLDS brand fill */
+.slds-form-element__control .slds-checkbox input:checked + .slds-checkbox_faux {
+  border-color: var(--slds-c-checkbox-color-border-checked, #0176d3);
+  background-color: var(--slds-c-checkbox-color-background-checked, #0176d3);
+}
+/* Centered checkmark: SLDS L-shape (border-bottom + border-left, rotated), centered with transform */
+.slds-form-element__control .slds-checkbox input:checked + .slds-checkbox_faux::after {
+  content: "";
+  display: block;
+  height: 0.25rem;
+  width: 0.5rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  border-bottom: 2px solid var(--slds-c-checkbox-mark-color-foreground, #fff);
+  border-left: 2px solid var(--slds-c-checkbox-mark-color-foreground, #fff);
+}
+/* Focus state: SLDS focus ring */
+.slds-form-element__control .slds-checkbox input:focus + .slds-checkbox_faux {
+  border-color: var(--slds-c-checkbox-color-border-focus, #1b96ff);
+  box-shadow: 0 0 3px #0176d3;
+}
+.slds-form-element__control .slds-checkbox .slds-form-element__label {
+  margin-left: 0.5rem;
 }
