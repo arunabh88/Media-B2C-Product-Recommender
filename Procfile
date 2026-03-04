@@ -1,1 +1,1 @@
-web: npx serve ./dist -s -l 0.0.0.0:$PORT
+web: npx serve ./dist -s -l tcp://0.0.0.0:$PORT
