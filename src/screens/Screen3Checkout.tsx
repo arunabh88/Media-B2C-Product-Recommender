@@ -13,6 +13,15 @@ interface Screen3CheckoutProps {
 
 const TOTAL_LABEL = 'Total today'
 
+const DUMMY_CARD = {
+  number: '4234 1000 1666 4543',
+  name: 'Arunabh Mukherjee',
+  expiry: '12/28',
+  cvc: '123',
+}
+
+const DUMMY_UPI_ID = 'arunabh.mukherjee@okaxisbank'
+
 export function Screen3Checkout({ selectedBundle, onNext, onBack, registerPrimaryAction }: Screen3CheckoutProps) {
   const bundleName = selectedBundle?.name ?? 'Your plan'
   const totalValue = selectedBundle?.priceDisplay ?? '$54.99/mo'
@@ -21,6 +30,30 @@ export function Screen3Checkout({ selectedBundle, onNext, onBack, registerPrimar
   const [paymentTab, setPaymentTab] = useState<'card' | 'upi'>('card')
   const [processing, setProcessing] = useState(false)
   const [paymentFailed, setPaymentFailed] = useState(false)
+  const [cardNumber, setCardNumber] = useState('')
+  const [nameOnCard, setNameOnCard] = useState('')
+  const [expiry, setExpiry] = useState('')
+  const [cvc, setCvc] = useState('')
+  const [upiId, setUpiId] = useState('')
+
+  const isCardFormComplete = Boolean(cardNumber && nameOnCard && expiry && cvc)
+  const isUpiFormComplete = Boolean(upiId.trim())
+
+  const fillCardNumberOnFocus = () => {
+    if (cardNumber.trim() === '') setCardNumber(DUMMY_CARD.number)
+  }
+  const fillNameOnFocus = () => {
+    if (nameOnCard.trim() === '') setNameOnCard(DUMMY_CARD.name)
+  }
+  const fillExpiryOnFocus = () => {
+    if (expiry.trim() === '') setExpiry(DUMMY_CARD.expiry)
+  }
+  const fillCvcOnFocus = () => {
+    if (cvc.trim() === '') setCvc(DUMMY_CARD.cvc)
+  }
+  const fillUpiIdOnFocus = () => {
+    if (upiId.trim() === '') setUpiId(DUMMY_UPI_ID)
+  }
 
   const handleConfirmSubscribe = () => {
     setProcessing(true)
@@ -31,6 +64,16 @@ export function Screen3Checkout({ selectedBundle, onNext, onBack, registerPrimar
     if (Math.random() < 0.25) { setPaymentFailed(true); return }
     setPaymentModalOpen(false)
     onNext()
+  }
+
+  const handleClosePaymentModal = () => {
+    setCardNumber('')
+    setNameOnCard('')
+    setExpiry('')
+    setCvc('')
+    setUpiId('')
+    setPaymentFailed(false)
+    setPaymentModalOpen(false)
   }
 
   useEffect(() => {
@@ -152,54 +195,140 @@ export function Screen3Checkout({ selectedBundle, onNext, onBack, registerPrimar
 
       <Modal
         open={paymentModalOpen}
-        onClose={() => setPaymentModalOpen(false)}
+        onClose={handleClosePaymentModal}
         title="Pay with card or UPI"
         footer={
           <button
             type="button"
             className="slds-button slds-button_neutral"
-            onClick={() => setPaymentModalOpen(false)}
+            onClick={handleClosePaymentModal}
           >
             Cancel
           </button>
         }
       >
-        <div className="payment-modal-tabs">
-          <div className="slds-tabs_default">
-            <ul className="slds-tabs_default__nav" role="tablist">
-              <li className={`slds-tabs_default__item ${paymentTab === 'card' ? 'slds-is-active' : ''}`} role="presentation">
-                <button type="button" className="slds-tabs_default__link" role="tab" onClick={() => setPaymentTab('card')}>Card</button>
-              </li>
-              <li className={`slds-tabs_default__item ${paymentTab === 'upi' ? 'slds-is-active' : ''}`} role="presentation">
-                <button type="button" className="slds-tabs_default__link" role="tab" onClick={() => setPaymentTab('upi')}>UPI</button>
-              </li>
-            </ul>
-          </div>
-          {paymentTab === 'card' && (
+        <div className="payment-tabs">
+          <ul className="payment-tabs__nav" role="tablist" aria-label="Payment method">
+            <li className={`payment-tabs__item ${paymentTab === 'card' ? 'payment-tabs__item--active' : ''}`} role="presentation">
+              <button
+                type="button"
+                id="payment-tab-card"
+                className="payment-tabs__link"
+                role="tab"
+                tabIndex={paymentTab === 'card' ? 0 : -1}
+                aria-selected={paymentTab === 'card'}
+                aria-controls="payment-panel-card"
+                onClick={() => setPaymentTab('card')}
+              >
+                Card
+              </button>
+            </li>
+            <li className={`payment-tabs__item ${paymentTab === 'upi' ? 'payment-tabs__item--active' : ''}`} role="presentation">
+              <button
+                type="button"
+                id="payment-tab-upi"
+                className="payment-tabs__link"
+                role="tab"
+                tabIndex={paymentTab === 'upi' ? 0 : -1}
+                aria-selected={paymentTab === 'upi'}
+                aria-controls="payment-panel-upi"
+                onClick={() => setPaymentTab('upi')}
+              >
+                UPI
+              </button>
+            </li>
+          </ul>
+          <div className="payment-tabs__content">
+            <div
+              id="payment-panel-card"
+              className={`payment-tabs__panel ${paymentTab === 'card' ? '' : 'payment-tabs__panel--hidden'}`}
+              role="tabpanel"
+              aria-labelledby="payment-tab-card"
+              hidden={paymentTab !== 'card'}
+            >
             <div className="slds-p-around_medium payment-form">
               <div className="slds-form-element slds-m-bottom_small">
                 <label className="slds-form-element__label" htmlFor="card-number">Card number</label>
-                <input id="card-number" type="text" className="slds-input" placeholder="1234 5678 9012 3456" maxLength={19} />
+                <div className="card-number-input-wrap">
+                  <input
+                    id="card-number"
+                    type="text"
+                    className={`slds-input ${cardNumber.trim() ? 'card-number-input-with-icon' : ''}`}
+                    placeholder="1234 5678 9012 3456"
+                    maxLength={19}
+                    value={cardNumber}
+                    onChange={(e) => setCardNumber(e.target.value)}
+                    onFocus={fillCardNumberOnFocus}
+                  />
+                  {cardNumber.trim() && (
+                    <span className="card-number-icon" aria-hidden="true">
+                      <svg width="36" height="24" viewBox="0 0 36 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mastercard">
+                        <circle cx="14" cy="12" r="8" fill="#EB001B"/>
+                        <circle cx="22" cy="12" r="8" fill="#F79E1B"/>
+                      </svg>
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="slds-form-element slds-m-bottom_small">
                 <label className="slds-form-element__label" htmlFor="card-name">Name on card</label>
-                <input id="card-name" type="text" className="slds-input" placeholder="John Doe" />
+                <input
+                  id="card-name"
+                  type="text"
+                  className="slds-input"
+                  placeholder="Ex. John Miller"
+                  value={nameOnCard}
+                  onChange={(e) => setNameOnCard(e.target.value)}
+                  onFocus={fillNameOnFocus}
+                />
               </div>
               <div className="slds-grid slds-gutters_small">
                 <div className="slds-col slds-size_1-of-2">
                   <div className="slds-form-element slds-m-bottom_small">
                     <label className="slds-form-element__label" htmlFor="card-exp">Expiry</label>
-                    <input id="card-exp" type="text" className="slds-input" placeholder="MM/YY" maxLength={5} />
+                    <input
+                      id="card-exp"
+                      type="text"
+                      className="slds-input"
+                      placeholder="MM/YY"
+                      maxLength={5}
+                      value={expiry}
+                      onChange={(e) => setExpiry(e.target.value)}
+                      onFocus={fillExpiryOnFocus}
+                    />
                   </div>
                 </div>
                 <div className="slds-col slds-size_1-of-2">
                   <div className="slds-form-element slds-m-bottom_small">
                     <label className="slds-form-element__label" htmlFor="card-cvc">CVC</label>
-                    <input id="card-cvc" type="text" className="slds-input" placeholder="123" maxLength={4} />
+                    <input
+                      id="card-cvc"
+                      type="text"
+                      className="slds-input"
+                      placeholder="123"
+                      maxLength={4}
+                      value={cvc}
+                      onChange={(e) => setCvc(e.target.value)}
+                      onFocus={fillCvcOnFocus}
+                    />
                   </div>
                 </div>
               </div>
-              <button type="button" className="slds-button slds-button_brand slds-button_stretch slds-m-top_small" onClick={handlePayInModal}>Pay {totalValue}</button>
+              <button
+                type="button"
+                className="slds-button slds-button_link slds-m-top_small payment-form-save-card"
+                onClick={() => {}}
+              >
+                Save this card
+              </button>
+              <button
+                type="button"
+                className="slds-button slds-button_brand slds-button_stretch slds-m-top_small"
+                disabled={!isCardFormComplete}
+                onClick={handlePayInModal}
+              >
+                Pay {totalValue}
+              </button>
               {paymentFailed && (
                 <div className="slds-m-top_small slds-theme_error" style={{ padding: '0.5rem', borderRadius: 4 }}>
                   <p className="slds-text-body_small">That didn&apos;t go through. Want to try again or switch methods?</p>
@@ -208,17 +337,47 @@ export function Screen3Checkout({ selectedBundle, onNext, onBack, registerPrimar
                 </div>
               )}
             </div>
-          )}
-          {paymentTab === 'upi' && (
+            </div>
+            <div
+              id="payment-panel-upi"
+              className={`payment-tabs__panel ${paymentTab === 'upi' ? '' : 'payment-tabs__panel--hidden'}`}
+              role="tabpanel"
+              aria-labelledby="payment-tab-upi"
+              hidden={paymentTab !== 'upi'}
+            >
             <div className="slds-p-around_medium payment-upi">
-              <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small">Scan the QR code with your UPI app to pay.</p>
-              <div className="upi-qr-placeholder" aria-hidden="true">
-                <span className="upi-qr-placeholder-inner">QR Code</span>
-                <span className="slds-text-body_small slds-text-color_weak">Placeholder — scan to pay</span>
+              <p className="slds-text-body_small slds-text-color_weak slds-m-bottom_small payment-upi-intro">Scan the QR code with your UPI app to pay.</p>
+              <div className="upi-qr-wrap" aria-hidden="true">
+                <img
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=upi%3A%2F%2Fpay%3Fpa%3Dsample%40upi%26pn%3DMediaCloud%26am%3D54.99"
+                  alt="Sample UPI QR code — scan with your UPI app"
+                  width={140}
+                  height={140}
+                  className="upi-qr-code"
+                />
               </div>
               <p className="slds-text-body_small slds-m-top_small slds-text-color_weak">Or enter your UPI ID below (e.g. name@paytm).</p>
-              <input type="text" className="slds-input slds-m-top_x-small" placeholder="UPI ID" />
-              <button type="button" className="slds-button slds-button_brand slds-button_stretch slds-m-top_small" onClick={handlePayInModal}>Pay {totalValue}</button>
+              <div className="upi-id-field-wrap">
+                <input
+                  type="text"
+                  className="slds-input slds-m-top_x-small"
+                  placeholder="UPI ID"
+                  value={upiId}
+                  onChange={(e) => setUpiId(e.target.value)}
+                  onFocus={fillUpiIdOnFocus}
+                />
+                {upiId.trim() && (
+                  <span className="upi-verified-badge" aria-label="Verified UPI">Verified UPI</span>
+                )}
+              </div>
+              <button
+                type="button"
+                className="slds-button slds-button_brand slds-button_stretch slds-m-top_small"
+                disabled={!isUpiFormComplete}
+                onClick={handlePayInModal}
+              >
+                Pay {totalValue}
+              </button>
               {paymentFailed && (
                 <div className="slds-m-top_small slds-theme_error" style={{ padding: '0.5rem', borderRadius: 4 }}>
                   <p className="slds-text-body_small">That didn&apos;t go through. Want to try again or switch methods?</p>
@@ -227,7 +386,8 @@ export function Screen3Checkout({ selectedBundle, onNext, onBack, registerPrimar
                 </div>
               )}
             </div>
-          )}
+            </div>
+          </div>
         </div>
       </Modal>
     </motion.div>

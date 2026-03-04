@@ -32,7 +32,6 @@ interface Screen2BundleProps {
 export function Screen2Bundle({ prompt, initialBestFitBundleId, onNext, onPriceBreakdown, onBack }: Screen2BundleProps) {
   const [loading, setLoading] = useState(true)
   const [showAlternates, setShowAlternates] = useState(false)
-  const [whyOpen, setWhyOpen] = useState(false)
   const orderedBundles = useMemo(() => {
     const byRelevance = orderByRelevance(BUNDLES, prompt)
     if (initialBestFitBundleId) {
@@ -146,7 +145,7 @@ export function Screen2Bundle({ prompt, initialBestFitBundleId, onNext, onPriceB
                   <p className="slds-text-body_small">Not sure we nailed it? <button type="button" className="slds-button slds-button_link slds-button_inline" onClick={onBack}>Tweak this in one tap</button>.</p>
                 </div>
               )}
-              <BestFitCard bundle={bestFit} whyOpen={whyOpen} onWhyToggle={() => setWhyOpen((v) => !v)} onContinue={() => onNext(bestFit.id)} onPriceBreakdown={() => onPriceBreakdown(bestFit.id)} />
+              <BestFitCard bundle={bestFit} onContinue={() => onNext(bestFit.id)} onPriceBreakdown={() => onPriceBreakdown(bestFit.id)} />
               <div className="slds-m-top_small bundle-secondary-actions">
                 <button type="button" className="slds-button slds-button_neutral" onClick={() => setShowAlternates((v) => !v)}>{showAlternates ? 'Hide other options' : 'See Other Options'}</button>
                 {onBack && <button type="button" className="slds-button slds-button_link slds-m-left_small" onClick={onBack}>Change Preferences</button>}
@@ -169,8 +168,7 @@ export function Screen2Bundle({ prompt, initialBestFitBundleId, onNext, onPriceB
   )
 }
 
-function BestFitCard({ bundle, whyOpen, onWhyToggle, onContinue, onPriceBreakdown }: { bundle: BundleDefinition; whyOpen: boolean; onWhyToggle: () => void; onContinue: () => void; onPriceBreakdown: () => void }) {
-  const explanation = bundle.aiExplanation ?? bundle.deviceNote ?? 'Based on your preferences and device.'
+function BestFitCard({ bundle, onContinue, onPriceBreakdown }: { bundle: BundleDefinition; onContinue: () => void; onPriceBreakdown: () => void }) {
   const hasPromo = bundle.breakdown.some((i) => i.isDiscount)
   return (
     <article className="slds-card bundle-card">
@@ -201,10 +199,6 @@ function BestFitCard({ bundle, whyOpen, onWhyToggle, onContinue, onPriceBreakdow
             <span className="slds-text-body_small slds-text-color_weak">{bundle.deviceNote}</span>
           </div>
         )}
-        <div className="slds-m-top_small">
-          <button type="button" className="slds-button slds-button_stretch slds-button_link slds-text-body_small" onClick={onWhyToggle} aria-expanded={whyOpen}>Why this plan? {whyOpen ? '−' : '+'}</button>
-          {whyOpen && <p className="slds-text-body_small slds-text-color_weak slds-m-top_x-small slds-p-left_small">{explanation}</p>}
-        </div>
       </div>
       <div className="slds-card__footer">
         <p className="slds-text-body_small slds-m-bottom_x-small slds-text-color_weak">Total</p>

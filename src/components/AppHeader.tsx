@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Icons } from './Icons'
 import type { StepValue } from './ProgressIndicator'
 
 interface AppHeaderProps {
   currentStep?: StepValue
   onLogoClick?: () => void
-  /** Home: go to discovery (landing) */
   onHomeClick?: () => void
-  /** Find Plans: go to discovery and show plans (e.g. open browse modal) */
   onFindPlansClick?: () => void
-  /** Watch: go to activation */
   onMyLibraryClick?: () => void
+  onProfileSettings?: () => void
+  onExploreMyPicks?: () => void
+  onManageMyPlan?: () => void
+  onWatchNow?: () => void
+  onSignOut?: () => void
 }
 
 const NAV_LINKS: { label: string; href: string; navKey: 'home' | 'discover' | 'library' }[] = [
@@ -59,8 +61,22 @@ function renderNavLinks(
   })
 }
 
-export function AppHeader({ currentStep, onLogoClick, onHomeClick, onFindPlansClick, onMyLibraryClick }: AppHeaderProps) {
+export function AppHeader({
+  currentStep,
+  onLogoClick,
+  onHomeClick,
+  onFindPlansClick,
+  onMyLibraryClick,
+  onProfileSettings,
+  onExploreMyPicks,
+  onManageMyPlan,
+  onWatchNow,
+  onSignOut,
+}: AppHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const profileButtonRef = useRef<HTMLButtonElement>(null)
+  const profileMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -75,6 +91,26 @@ export function AppHeader({ currentStep, onLogoClick, onHomeClick, onFindPlansCl
       }
     }
   }, [mobileMenuOpen])
+
+  useEffect(() => {
+    if (!profileMenuOpen) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setProfileMenuOpen(false)
+    }
+    const onClickOutside = (e: MouseEvent) => {
+      if (
+        profileMenuRef.current?.contains(e.target as Node) ||
+        profileButtonRef.current?.contains(e.target as Node)
+      ) return
+      setProfileMenuOpen(false)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    document.addEventListener('mousedown', onClickOutside)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.removeEventListener('mousedown', onClickOutside)
+    }
+  }, [profileMenuOpen])
 
   const brandContent = (
     <>
@@ -126,9 +162,69 @@ export function AppHeader({ currentStep, onLogoClick, onHomeClick, onFindPlansCl
           <button type="button" className="app-header__icon-btn" aria-label="Help">
             {Icons.help}
           </button>
-          <button type="button" className="app-header__icon-btn" aria-label="Profile">
-            {Icons.userAction}
-          </button>
+          <div className="app-header__profile-wrap">
+            <button
+              ref={profileButtonRef}
+              type="button"
+              className="app-header__icon-btn app-header__profile-btn"
+              onClick={() => setProfileMenuOpen((o) => !o)}
+              aria-label="Profile menu"
+              aria-expanded={profileMenuOpen}
+              aria-haspopup="true"
+            >
+              {Icons.userAction}
+            </button>
+            {profileMenuOpen && (
+              <div
+                ref={profileMenuRef}
+                className="app-header__profile-menu"
+                role="menu"
+                aria-label="Profile menu"
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-header__profile-menu-item"
+                  onClick={() => { onProfileSettings?.(); setProfileMenuOpen(false) }}
+                >
+                  Profile Settings
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-header__profile-menu-item"
+                  onClick={() => { onExploreMyPicks?.(); setProfileMenuOpen(false) }}
+                >
+                  Explore My Picks
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-header__profile-menu-item"
+                  onClick={() => { onManageMyPlan?.(); setProfileMenuOpen(false) }}
+                >
+                  Manage My Plan
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-header__profile-menu-item"
+                  onClick={() => { onWatchNow?.(); setProfileMenuOpen(false) }}
+                >
+                  Watch Now
+                </button>
+                <div className="app-header__profile-menu-divider" aria-hidden="true" />
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-header__profile-menu-item app-header__profile-menu-item--signout"
+                  onClick={() => { onSignOut?.(); setProfileMenuOpen(false) }}
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

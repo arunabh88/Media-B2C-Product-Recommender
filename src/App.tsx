@@ -18,6 +18,8 @@ export default function App() {
   const [breakdownPromoId, setBreakdownPromoId] = useState<string | null>(null)
   const [browseModalOpen, setBrowseModalOpen] = useState(false)
   const checkoutPrimaryActionRef = useRef<(() => void) | null>(null)
+  const scrollToPicksRef = useRef<(() => void) | null>(null)
+  const openManageModalRef = useRef<(() => void) | null>(null)
 
   const goTo = (next: StepValue) => setStep(next)
 
@@ -51,6 +53,14 @@ export default function App() {
     setBreakdownPromoId(null)
   }
 
+  const handleExploreMyPicks = () => {
+    if (step === 'activation') scrollToPicksRef.current?.()
+    else goTo('activation')
+  }
+  const handleManageMyPlan = () => {
+    openManageModalRef.current?.()
+  }
+
   return (
     <div className="app">
       <AppHeader
@@ -59,10 +69,15 @@ export default function App() {
         onHomeClick={() => goTo('discovery')}
         onFindPlansClick={() => { goTo('discovery'); setBrowseModalOpen(true) }}
         onMyLibraryClick={() => goTo('activation')}
+        onProfileSettings={() => {}}
+        onExploreMyPicks={handleExploreMyPicks}
+        onManageMyPlan={handleManageMyPlan}
+        onWatchNow={handleWatchNow}
+        onSignOut={() => goTo('discovery')}
       />
       <main className="main-content">
         <div className={`main-content-card${step === 'discovery' ? ' main-content-card--discovery' : ''}`}>
-          <ProgressIndicator currentStep={step} />
+          {step !== 'activation' && <ProgressIndicator currentStep={step} />}
           <div className="main-content-inner">
         <AnimatePresence mode="wait">
           {step === 'discovery' && (
@@ -107,7 +122,10 @@ export default function App() {
             <Screen4Activation
               key="4"
               selectedBundle={selectedBundle}
+              discoveryPrompt={prompt}
               onWatchNow={handleWatchNow}
+              registerScrollToPicks={(fn) => { scrollToPicksRef.current = fn }}
+              registerOpenManageModal={(fn) => { openManageModalRef.current = fn }}
             />
           )}
         </AnimatePresence>

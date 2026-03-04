@@ -116,7 +116,7 @@ export function Screen3Validation({ selectedBundle, onNext, onBack }: Screen3Val
 
       <div className="slds-m-bottom_medium">
         <p className="slds-text-body_small slds-m-bottom_x-small">
-          Watching on: {watchingOnLabel(selectedDevices)}
+          Watching on: <strong>{watchingOnLabel(selectedDevices)}</strong>
           {' · '}
           <button
             type="button"
