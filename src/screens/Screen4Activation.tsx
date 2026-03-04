@@ -16,7 +16,7 @@ interface Screen4ActivationProps {
 
 export function Screen4Activation({ selectedBundle, discoveryPrompt = '', onWatchNow, registerScrollToPicks, registerOpenManageModal }: Screen4ActivationProps) {
   const bundleName = selectedBundle?.name ?? 'Your'
-  const topPicksRef = useRef<HTMLElement>(null)
+  const topPicksRef = useRef<HTMLDivElement>(null)
   const [manageModalOpen, setManageModalOpen] = useState(false)
   const [contentReady, setContentReady] = useState(false)
 
